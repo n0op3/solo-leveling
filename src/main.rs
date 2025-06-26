@@ -1,10 +1,7 @@
-use ratatui::style::Style;
-use ratatui::symbols;
 use std::io;
 
 use crossterm::event::{self, KeyCode};
 use ratatui::text::Line;
-use ratatui::widgets::Tabs;
 use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
@@ -13,6 +10,10 @@ use ratatui::{
     symbols::border,
     widgets::{Block, Paragraph, Widget},
 };
+
+mod widget;
+
+use crate::widget::tabs::TabsState;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -25,25 +26,6 @@ fn main() -> io::Result<()> {
 pub struct App<'a> {
     exit: bool,
     tabs: TabsState<'a>,
-}
-
-#[derive(Debug, Default)]
-struct TabsState<'a> {
-    tabs: Vec<&'a str>,
-    index: usize,
-}
-
-impl<'a> TabsState<'a> {
-    pub fn new(tabs: Vec<&'a str>) -> Self {
-        Self { tabs, index: 0 }
-    }
-
-    fn next(&mut self) {
-        self.index += 1;
-        if self.index == self.tabs.len() {
-            self.index = 0;
-        }
-    }
 }
 
 impl Default for App<'_> {
@@ -99,21 +81,6 @@ impl Widget for &App<'_> {
         Paragraph::new("Welcome, Player")
             .centered()
             .block(block)
-            .render(area, buf);
-    }
-}
-
-impl Widget for &TabsState<'_> {
-    fn render(self, area: Rect, buf: &mut Buffer)
-    where
-        Self: Sized,
-    {
-        Tabs::new(self.tabs.clone())
-            .block(Block::bordered())
-            .style(Style::default().white())
-            .highlight_style(Style::default().yellow())
-            .select(self.index)
-            .divider(symbols::DOT)
             .render(area, buf);
     }
 }
