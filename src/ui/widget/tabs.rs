@@ -34,7 +34,7 @@ impl Widget for &TabsState<'_> {
         Tabs::new(self.tabs.clone())
             .block(Block::bordered())
             .style(Style::default().white())
-            .highlight_style(Style::default().yellow())
+            .highlight_style(Style::default().blue())
             .select(self.index)
             .divider(symbols::DOT)
             .render(area, buf);

@@ -1,7 +1,8 @@
 use std::io;
 
-use crate::widget::tabs::TabsState;
+use crate::ui::widget::tabs::TabsState;
 use crossterm::event::{self, KeyCode};
+use ratatui::style::Style;
 use ratatui::text::Line;
 use ratatui::{
     DefaultTerminal, Frame,
@@ -66,11 +67,12 @@ impl Widget for &App<'_> {
             .title_bottom(instructions.centered())
             .border_set(border::THICK);
 
-        self.tabs.render(area, buf);
-
         Paragraph::new("Welcome, Player")
+            .style(Style::default().white())
             .centered()
             .block(block)
             .render(area, buf);
+
+        self.tabs.render(area, buf);
     }
 }
