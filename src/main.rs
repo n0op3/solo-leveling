@@ -82,7 +82,12 @@ impl App<'_> {
 impl Widget for &App<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let title = Line::from(" The System ".bold());
-        let instructions = Line::from(vec![" Quit ".into(), "<Q> ".blue().bold()]);
+        let instructions = Line::from(vec![
+            " Quit ".into(),
+            "<Q> ".blue().bold(),
+            " Next page ".into(),
+            "<Tab> ".blue().bold(),
+        ]);
 
         let block = Block::bordered()
             .title(title.centered())
