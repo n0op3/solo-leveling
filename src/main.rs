@@ -2,6 +2,8 @@ use std::io;
 
 use crate::ui::app::App;
 
+pub mod config;
+pub mod exercise;
 mod ui;
 
 fn main() -> io::Result<()> {

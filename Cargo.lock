@@ -723,6 +723,7 @@ dependencies = [
  "crossterm 0.29.0",
  "dirs-next",
  "ratatui",
+ "serde",
  "strum 0.27.1",
  "toml",
 ]

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io;
 
 use crate::ui::widget::tabs::TabsState;
@@ -13,8 +14,12 @@ use ratatui::{
     widgets::{Block, Paragraph, Widget},
 };
 
+use crate::config::load_exercises;
+use crate::exercise::ExerciseTemplate;
+
 #[derive(Debug)]
 pub struct App<'a> {
+    exercises: HashMap<String, ExerciseTemplate>,
     exit: bool,
     tabs: TabsState<'a>,
 }
@@ -22,6 +27,7 @@ pub struct App<'a> {
 impl Default for App<'_> {
     fn default() -> Self {
         Self {
+            exercises: load_exercises(),
             exit: false,
             tabs: TabsState::new(vec!["Overview", "Workouts"]),
         }
@@ -30,6 +36,7 @@ impl Default for App<'_> {
 
 impl App<'_> {
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+        println!("{:?}", self.exercises);
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             if let Some(key) = event::read()?.as_key_press_event() {
