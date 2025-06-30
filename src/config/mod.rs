@@ -15,7 +15,10 @@ pub fn get_config_path() -> PathBuf {
 pub fn load_exercises() -> HashMap<String, ExerciseTemplate> {
     let mut exercises = HashMap::new();
 
-    for file in read_dir(get_config_path()).unwrap() {
+    let mut exercise_path = get_config_path();
+    exercise_path.push("exercises");
+
+    for file in read_dir(exercise_path).unwrap() {
         let file = file.unwrap();
         if file.path().is_file() && file.path().extension().unwrap_or_default() == "toml" {
             let contents = read_to_string(file.path()).unwrap();
