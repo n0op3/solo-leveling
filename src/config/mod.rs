@@ -32,10 +32,10 @@ pub fn load_exercises() -> HashMap<String, ExerciseTemplate> {
                 let exercise_type = value.get("type").unwrap_or(&rep);
 
                 let exercise = match exercise_type.as_str().unwrap() {
-                    "rep" => Some(ExerciseTemplate::RepExercise {
+                    "rep" => Some(ExerciseTemplate::Dynamic {
                         xp: xp.as_integer().unwrap() as usize,
                     }),
-                    "timed" => Some(ExerciseTemplate::TimedExercise {
+                    "timed" => Some(ExerciseTemplate::Static {
                         xp: xp.as_integer().unwrap() as usize,
                     }),
                     _ => {

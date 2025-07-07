@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::io;
 
 use crossterm::event::{self, KeyCode};
@@ -12,13 +11,10 @@ use ratatui::{
     widgets::{Block, Gauge, Paragraph},
 };
 
-use crate::config::load_exercises;
-use crate::exercise::ExerciseTemplate;
 use crate::ui::widget::tabs::Tab;
 
 #[derive(Debug)]
 pub struct App {
-    exercises: HashMap<String, ExerciseTemplate>,
     exit: bool,
     username: String,
     current_tab: Tab,
@@ -27,7 +23,6 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
-            exercises: load_exercises(),
             exit: false,
             username: whoami::realname(),
             current_tab: Tab::Dashboard,
