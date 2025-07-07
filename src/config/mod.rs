@@ -13,7 +13,7 @@ intelligence = 0
 
 #[derive(Debug, Default)]
 pub struct UserConfig {
-    categories: Vec<Category>,
+    pub categories: Vec<Category>,
 }
 
 pub fn load_user_config() -> UserConfig {

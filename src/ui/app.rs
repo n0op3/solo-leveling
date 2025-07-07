@@ -2,6 +2,7 @@ use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::Style;
 use ratatui::text::Line;
+use ratatui::widgets::Gauge;
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
@@ -18,17 +19,22 @@ pub struct App {
     exit: bool,
     username: String,
     user_config: UserConfig,
+    total_xp: usize,
     current_tab: Tab,
 }
 
 impl Default for App {
     fn default() -> Self {
-        Self {
+        let mut app = Self {
             exit: false,
             username: whoami::realname(),
             user_config: load_user_config(),
+            total_xp: 0,
             current_tab: Tab::Dashboard,
-        }
+        };
+        app.update_stats();
+
+        app
     }
 }
 
@@ -61,11 +67,7 @@ impl App {
 
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Percentage(2),
-                Constraint::Percentage(2),
-                Constraint::Percentage(4),
-            ])
+            .constraints([Constraint::Percentage(2), Constraint::Percentage(4)])
             .horizontal_margin(4)
             .split(area);
 
@@ -78,25 +80,17 @@ impl App {
             chunks[0],
         );
 
-        frame.render_widget(
-            Paragraph::new("LEVEL 1")
-                .style(Style::default().white())
-                .centered(),
-            chunks[1],
-        );
-
-        //
-        // match self.current_tab {
-        //     Tab::Dashboard => frame.render_widget(
-        //         Gauge::default()
-        //             .block(Block::new().title("STRENGTH"))
-        //             .gauge_style(Style::new().cyan().on_black())
-        //             .label("69/420 XP")
-        //             .percent(40),
-        //         chunks[2],
-        //     ),
-        //     Tab::Workouts => {}
-        // }
+        match self.current_tab {
+            Tab::Dashboard => frame.render_widget(
+                Gauge::default()
+                    .block(Block::bordered().title("LEVEL"))
+                    .gauge_style(Style::new().cyan().on_black())
+                    .label(format!("{}/100 XP", self.total_xp))
+                    .percent(self.total_xp as u16),
+                chunks[1],
+            ),
+            Tab::Workouts => {}
+        }
     }
 
     fn handle_key(&mut self, key: event::KeyEvent) {
@@ -109,6 +103,13 @@ impl App {
                 }
             }
             _ => {}
+        }
+    }
+
+    fn update_stats(&mut self) {
+        self.total_xp = 0;
+        for category in self.user_config.categories.iter() {
+            self.total_xp += category.xp;
         }
     }
 }

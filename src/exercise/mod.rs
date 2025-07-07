@@ -8,8 +8,8 @@ pub enum ExerciseTemplate {
 
 #[derive(Debug)]
 pub struct Category {
-    name: String,
-    xp: usize,
+    pub name: String,
+    pub xp: usize,
 }
 
 impl Category {
