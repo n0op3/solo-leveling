@@ -6,7 +6,7 @@ use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
     symbols::border,
-    widgets::{Block, Gauge, Paragraph},
+    widgets::{Block, Paragraph},
 };
 use std::io;
 
@@ -75,24 +75,24 @@ impl App {
             chunks[0],
         );
 
-        frame.render_widget(
-            Paragraph::new("LEVEL 412")
-                .style(Style::default().white())
-                .centered(),
-            chunks[1],
-        );
-
-        match self.current_tab {
-            Tab::Dashboard => frame.render_widget(
-                Gauge::default()
-                    .block(Block::new())
-                    .gauge_style(Style::new().cyan().on_black())
-                    .label("69/420 XP")
-                    .percent(40),
-                chunks[2],
-            ),
-            Tab::Workouts => {}
-        }
+        // frame.render_widget(
+        //     Paragraph::new("LEVEL 412")
+        //         .style(Style::default().white())
+        //         .centered(),
+        //     chunks[1],
+        // );
+        //
+        // match self.current_tab {
+        //     Tab::Dashboard => frame.render_widget(
+        //         Gauge::default()
+        //             .block(Block::new().title("STRENGTH"))
+        //             .gauge_style(Style::new().cyan().on_black())
+        //             .label("69/420 XP")
+        //             .percent(40),
+        //         chunks[2],
+        //     ),
+        //     Tab::Workouts => {}
+        // }
     }
 
     fn handle_key(&mut self, key: event::KeyEvent) {
