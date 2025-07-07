@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::Style;
@@ -10,6 +8,7 @@ use ratatui::{
     symbols::border,
     widgets::{Block, Gauge, Paragraph},
 };
+use std::io;
 
 use crate::ui::widget::tabs::Tab;
 

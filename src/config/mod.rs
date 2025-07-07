@@ -1,21 +1,49 @@
 use crate::exercise::ExerciseTemplate;
 use dirs_next::config_dir;
 use std::collections::HashMap;
-use std::fs::{self, read_dir, read_to_string};
+use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
 use toml::Value;
 
-pub fn get_config_path() -> PathBuf {
-    let mut path = config_dir().expect("No config directory found");
-    path.push("solo-leveling");
-    fs::create_dir_all(&path).expect("Failed to create config directory");
-    path
+const CONFIG_FILE: &'static str = "solo-leveling/config.toml";
+const DEFAULT_CONFIG: &'static str = "
+    [categories]
+    strength = 0
+    speed = 0
+    intelligence = 0
+";
+
+pub fn get_config() -> File {
+    let mut config_path = config_dir().expect("No viable config directory found");
+    config_path.push(CONFIG_FILE);
+
+    if !config_path.exists() {
+        create_default_config();
+    }
+
+    File::open(config_path).expect("Failed to open the config file")
+}
+
+pub fn get_config_dir() -> PathBuf {
+    let mut config_path = config_dir().expect("No viable config directory found");
+    config_path.push("solo-leveling");
+
+    config_path
+}
+
+fn create_default_config() {
+    let mut config_path = get_config_dir();
+    fs::create_dir_all(&config_path).expect("Failed to create config directory");
+    config_path.push(CONFIG_FILE);
+    if !config_path.exists() {
+        fs::write(config_path, DEFAULT_CONFIG).expect("Failed to write the config file");
+    }
 }
 
 pub fn load_exercises() -> HashMap<String, ExerciseTemplate> {
     let mut exercises = HashMap::new();
 
-    let mut exercise_path = get_config_path();
+    let mut exercise_path = get_config_dir();
     exercise_path.push("exercises");
 
     for file in read_dir(exercise_path).unwrap() {
