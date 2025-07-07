@@ -62,7 +62,11 @@ impl App {
 
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(2), Constraint::Percentage(8)])
+            .constraints([
+                Constraint::Percentage(2),
+                Constraint::Percentage(2),
+                Constraint::Percentage(4),
+            ])
             .horizontal_margin(4)
             .split(area);
 
@@ -75,14 +79,21 @@ impl App {
             chunks[0],
         );
 
+        frame.render_widget(
+            Paragraph::new("LEVEL 412")
+                .style(Style::default().white())
+                .centered(),
+            chunks[1],
+        );
+
         match self.current_tab {
             Tab::Dashboard => frame.render_widget(
                 Gauge::default()
-                    .block(Block::bordered().title("LVL"))
-                    .gauge_style(Style::new().red().on_black().italic())
+                    .block(Block::new())
+                    .gauge_style(Style::new().cyan().on_black())
                     .label("69/420 XP")
                     .percent(40),
-                chunks[1],
+                chunks[2],
             ),
             Tab::Workouts => {}
         }
