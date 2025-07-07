@@ -10,12 +10,14 @@ use ratatui::{
 };
 use std::io;
 
+use crate::config::{UserConfig, load_user_config};
 use crate::ui::widget::tabs::Tab;
 
 #[derive(Debug)]
 pub struct App {
     exit: bool,
     username: String,
+    user_config: UserConfig,
     current_tab: Tab,
 }
 
@@ -24,6 +26,7 @@ impl Default for App {
         Self {
             exit: false,
             username: whoami::realname(),
+            user_config: load_user_config(),
             current_tab: Tab::Dashboard,
         }
     }
@@ -75,12 +78,13 @@ impl App {
             chunks[0],
         );
 
-        // frame.render_widget(
-        //     Paragraph::new("LEVEL 412")
-        //         .style(Style::default().white())
-        //         .centered(),
-        //     chunks[1],
-        // );
+        frame.render_widget(
+            Paragraph::new("LEVEL 1")
+                .style(Style::default().white())
+                .centered(),
+            chunks[1],
+        );
+
         //
         // match self.current_tab {
         //     Tab::Dashboard => frame.render_widget(

@@ -7,7 +7,13 @@ pub enum ExerciseTemplate {
 }
 
 #[derive(Debug)]
-struct Category {
+pub struct Category {
     name: String,
     xp: usize,
+}
+
+impl Category {
+    pub fn new(name: String, xp: usize) -> Self {
+        Self { name, xp }
+    }
 }

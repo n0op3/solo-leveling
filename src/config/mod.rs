@@ -1,32 +1,50 @@
-use crate::exercise::ExerciseTemplate;
+use crate::exercise::{Category, ExerciseTemplate};
 use dirs_next::config_dir;
 use std::collections::HashMap;
 use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
-use toml::Value;
+use toml::{Table, Value};
 
-const CONFIG_FILE: &'static str = "solo-leveling/config.toml";
-const DEFAULT_CONFIG: &'static str = "
-    [categories]
-    strength = 0
-    speed = 0
-    intelligence = 0
+const DEFAULT_CONFIG: &'static str = "[categories]
+strength = 0
+speed = 0
+intelligence = 0
 ";
 
-pub fn get_config() -> File {
-    let mut config_path = config_dir().expect("No viable config directory found");
-    config_path.push(CONFIG_FILE);
+#[derive(Debug, Default)]
+pub struct UserConfig {
+    categories: Vec<Category>,
+}
+
+pub fn load_user_config() -> UserConfig {
+    let mut config = UserConfig::default();
+    let config_file: Table = toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
+        .expect("User config is not valid TOML");
+    for (name, xp) in config_file["categories"].as_table().unwrap().iter() {
+        config.categories.push(Category::new(
+            name.clone(),
+            xp.as_integer().unwrap() as usize,
+        ));
+    }
+
+    config
+}
+
+pub fn user_config_path() -> PathBuf {
+    let mut config_path = get_config_dir();
+    config_path.push("config.toml");
 
     if !config_path.exists() {
         create_default_config();
     }
 
-    File::open(config_path).expect("Failed to open the config file")
+    config_path
 }
 
 pub fn get_config_dir() -> PathBuf {
     let mut config_path = config_dir().expect("No viable config directory found");
     config_path.push("solo-leveling");
+    fs::create_dir_all(&config_path).expect("Failed to create the config directory");
 
     config_path
 }
@@ -34,8 +52,9 @@ pub fn get_config_dir() -> PathBuf {
 fn create_default_config() {
     let mut config_path = get_config_dir();
     fs::create_dir_all(&config_path).expect("Failed to create config directory");
-    config_path.push(CONFIG_FILE);
+    config_path.push("config.toml");
     if !config_path.exists() {
+        File::create(&config_path).expect("Failed to create the config file");
         fs::write(config_path, DEFAULT_CONFIG).expect("Failed to write the config file");
     }
 }
