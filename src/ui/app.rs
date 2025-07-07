@@ -20,6 +20,7 @@ use crate::ui::widget::tabs::Tab;
 pub struct App {
     exercises: HashMap<String, ExerciseTemplate>,
     exit: bool,
+    username: String,
     current_tab: Tab,
 }
 
@@ -28,6 +29,7 @@ impl Default for App {
         Self {
             exercises: load_exercises(),
             exit: false,
+            username: whoami::realname(),
             current_tab: Tab::Dashboard,
         }
     }
@@ -73,7 +75,7 @@ impl App {
         frame.render_widget(Paragraph::new("").block(block), frame.area()); // Render the outline
 
         frame.render_widget(
-            Paragraph::new("Welcome, Player")
+            Paragraph::new(format!("Welcome, {}", self.username))
                 .style(Style::default().white())
                 .centered(),
             chunks[0],

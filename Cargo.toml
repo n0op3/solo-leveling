@@ -11,3 +11,4 @@ ratatui = "0.29.0"
 serde = { version = "1.0.219", features = ["derive"] }
 strum = { version = "0.27.1", features = ["derive"] }
 toml = "0.8.23"
+whoami = "1.6.0"
