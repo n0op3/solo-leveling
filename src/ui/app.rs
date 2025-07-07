@@ -1,42 +1,40 @@
 use std::collections::HashMap;
 use std::io;
 
-use crate::ui::widget::tabs::TabsState;
 use crossterm::event::{self, KeyCode};
+use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::Style;
 use ratatui::text::Line;
 use ratatui::{
     DefaultTerminal, Frame,
-    buffer::Buffer,
-    layout::Rect,
     style::Stylize,
     symbols::border,
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Gauge, Paragraph},
 };
 
 use crate::config::load_exercises;
 use crate::exercise::ExerciseTemplate;
+use crate::ui::widget::tabs::Tab;
 
 #[derive(Debug)]
-pub struct App<'a> {
+pub struct App {
     exercises: HashMap<String, ExerciseTemplate>,
     exit: bool,
-    tabs: TabsState<'a>,
+    current_tab: Tab,
 }
 
-impl Default for App<'_> {
+impl Default for App {
     fn default() -> Self {
         Self {
             exercises: load_exercises(),
             exit: false,
-            tabs: TabsState::new(vec!["Overview", "Workouts"]),
+            current_tab: Tab::Dashboard,
         }
     }
 }
 
-impl App<'_> {
+impl App {
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-        println!("{:?}", self.exercises);
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             if let Some(key) = event::read()?.as_key_press_event() {
@@ -47,20 +45,6 @@ impl App<'_> {
     }
 
     fn draw(&self, frame: &mut Frame) {
-        frame.render_widget(self, frame.area());
-    }
-
-    fn handle_key(&mut self, key: event::KeyEvent) {
-        match key.code {
-            KeyCode::Char('q') => self.exit = true,
-            KeyCode::Tab => self.tabs.next(),
-            _ => {}
-        }
-    }
-}
-
-impl Widget for &App<'_> {
-    fn render(self, area: Rect, buf: &mut Buffer) {
         let title = Line::from(" The System ".bold());
         let instructions = Line::from(vec![
             " Quit ".into(),
@@ -74,12 +58,46 @@ impl Widget for &App<'_> {
             .title_bottom(instructions.centered())
             .border_set(border::THICK);
 
-        Paragraph::new("Welcome, Player")
-            .style(Style::default().white())
-            .centered()
-            .block(block)
-            .render(area, buf);
+        let area = frame.area().inner(Margin::new(1, 1));
 
-        self.tabs.render(area, buf);
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Percentage(2), Constraint::Percentage(8)])
+            .horizontal_margin(4)
+            .split(area);
+
+        frame.render_widget(Paragraph::new("").block(block), frame.area()); // Render the outline
+
+        frame.render_widget(
+            Paragraph::new("Welcome, Player")
+                .style(Style::default().white())
+                .centered(),
+            chunks[0],
+        );
+
+        match self.current_tab {
+            Tab::Dashboard => frame.render_widget(
+                Gauge::default()
+                    .block(Block::bordered().title("LVL"))
+                    .gauge_style(Style::new().red().on_black().italic())
+                    .label("69/420 XP")
+                    .percent(40),
+                chunks[1],
+            ),
+            Tab::Workouts => {}
+        }
+    }
+
+    fn handle_key(&mut self, key: event::KeyEvent) {
+        match key.code {
+            KeyCode::Char('q') => self.exit = true,
+            KeyCode::Tab => {
+                self.current_tab = match self.current_tab {
+                    Tab::Dashboard => Tab::Workouts,
+                    Tab::Workouts => Tab::Dashboard,
+                }
+            }
+            _ => {}
+        }
     }
 }
