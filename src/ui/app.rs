@@ -20,7 +20,7 @@ pub struct App {
     exit: bool,
     username: String,
     user_config: UserConfig,
-    total_xp: usize,
+    total_xp: i32,
     current_tab: Tab,
 }
 
@@ -98,19 +98,19 @@ impl App {
                         .label(format!(
                             "{}/{} XP",
                             self.total_xp,
-                            levelup_requirement(self.user_config.level)
+                            levelup_requirement(self.user_config.user.level as usize)
                         ))
                         .percent(self.total_xp as u16),
                     chunks[1],
                 );
                 let mut i = 2;
-                for category in self.user_config.categories.iter() {
+                for (category, xp) in self.user_config.categories.iter() {
                     frame.render_widget(
                         Gauge::default()
-                            .block(Block::bordered().title(category.name.to_uppercase()))
+                            .block(Block::bordered().title(category.to_uppercase()))
                             .gauge_style(Style::new().cyan().on_black())
-                            .label(format!("{}/100 XP", category.xp))
-                            .percent(category.xp as u16),
+                            .label(format!("{xp}/100 XP"))
+                            .percent(*xp as u16),
                         chunks[i],
                     );
 
@@ -136,8 +136,8 @@ impl App {
 
     fn update_stats(&mut self) {
         self.total_xp = 0;
-        for category in self.user_config.categories.iter() {
-            self.total_xp += category.xp;
+        for (_category, xp) in self.user_config.categories.iter() {
+            self.total_xp += xp;
         }
     }
 }

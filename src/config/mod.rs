@@ -1,9 +1,10 @@
-use crate::exercise::{Category, ExerciseTemplate};
+use crate::exercise::ExerciseTemplate;
 use dirs_next::config_dir;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
-use toml::{Table, Value};
+use toml::Value;
 
 const DEFAULT_CONFIG: &'static str = "
 [user]
@@ -15,22 +16,20 @@ speed = 0
 intelligence = 0
 ";
 
-#[derive(Debug, Default)]
+#[derive(Debug, Deserialize)]
 pub struct UserConfig {
-    pub level: usize,
-    pub categories: Vec<Category>,
+    pub user: User,
+    pub categories: HashMap<String, i32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct User {
+    pub level: i32,
 }
 
 pub fn load_user_config() -> UserConfig {
-    let mut config = UserConfig::default();
-    let config_file: Table = toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
-        .expect("User config is not valid TOML");
-    for (name, xp) in config_file["categories"].as_table().unwrap().iter() {
-        config.categories.push(Category::new(
-            name.clone(),
-            xp.as_integer().unwrap() as usize,
-        ));
-    }
+    let config: UserConfig = toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
+        .expect("User config is invalid");
 
     config
 }

@@ -5,15 +5,3 @@ pub enum ExerciseTemplate {
     Dynamic { xp: usize },
     Static { xp: usize },
 }
-
-#[derive(Debug)]
-pub struct Category {
-    pub name: String,
-    pub xp: usize,
-}
-
-impl Category {
-    pub fn new(name: String, xp: usize) -> Self {
-        Self { name, xp }
-    }
-}
