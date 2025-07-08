@@ -1,3 +1,4 @@
+use ratatui::style::Color;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -52,6 +53,15 @@ impl Exercise {
             3..=5 => Difficulty::Normal,
             6..=10 => Difficulty::Difficult,
             _ => Difficulty::Extreme,
+        }
+    }
+
+    pub fn color(&self) -> Color {
+        match self.difficulty() {
+            Difficulty::Easy => Color::Green,
+            Difficulty::Normal => Color::Yellow,
+            Difficulty::Difficult => Color::Red,
+            Difficulty::Extreme => Color::Magenta,
         }
     }
 }

@@ -1,6 +1,6 @@
 use crossterm::event::{self, KeyCode, KeyEvent};
 use ratatui::layout::{Constraint, Direction, Layout, Margin, Rect};
-use ratatui::style::{Color, Modifier, Style};
+use ratatui::style::{Modifier, Style};
 use ratatui::text::Line;
 use ratatui::widgets::{Clear, Gauge, Widget};
 use ratatui::{
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::io;
 
 use crate::config::{UserConfig, load_exercises, load_user_config};
-use crate::exercise::{Difficulty, Exercise};
+use crate::exercise::Exercise;
 use crate::level::levelup_requirement;
 use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
@@ -135,12 +135,7 @@ impl App {
                 let mut lines = Vec::new();
 
                 for (i, (exercise_name, exercise)) in self.exercises.iter().enumerate() {
-                    let style = Style::new().fg(match exercise.difficulty() {
-                        Difficulty::Easy => Color::Green,
-                        Difficulty::Normal => Color::Yellow,
-                        Difficulty::Difficult => Color::Red,
-                        Difficulty::Extreme => Color::Magenta,
-                    });
+                    let style = Style::new().fg(exercise.color());
 
                     let line = Line::styled(
                         format!(
@@ -276,9 +271,20 @@ impl Widget for &ExercisePopup {
         Clear::default().render(area, buf);
         block.render(area, buf);
 
+        let layout = Layout::new(
+            Direction::Vertical,
+            [Constraint::Fill(1), Constraint::Length(1)],
+        )
+        .split(area.inner(Margin::new(1, 1)));
+
         Paragraph::new(self.input.clone())
-            .block(block.clone())
+            .fg(self.exercise.color())
             .centered()
-            .render(area, buf);
+            .render(layout[0], buf);
+
+        Paragraph::new("Press Enter to confirm, q/Esc to cancel")
+            .dark_gray()
+            .centered()
+            .render(layout[1], buf);
     }
 }
