@@ -80,7 +80,10 @@ impl App {
             .horizontal_margin(4)
             .split(area);
 
-        frame.render_widget(Paragraph::new("").block(block), frame.area()); // Render the outline
+        frame.render_widget(
+            Paragraph::new(self.current_tab.name()).bold().block(block),
+            frame.area(),
+        );
 
         frame.render_widget(
             Paragraph::new(format!("Welcome, {}", self.username))
@@ -94,7 +97,7 @@ impl App {
                 frame.render_widget(
                     Gauge::default()
                         .block(Block::bordered().title("LEVEL"))
-                        .gauge_style(Style::new().red().on_black())
+                        .gauge_style(Style::new().red())
                         .label(format!(
                             "{}/{} XP",
                             self.total_xp,
