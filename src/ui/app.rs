@@ -65,9 +65,17 @@ impl App {
 
         let area = frame.area().inner(Margin::new(1, 1));
 
+        let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
+
+        {
+            for _category in self.user_config.categories.iter() {
+                constraints.push(Constraint::Max(3));
+            }
+        }
+
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(2), Constraint::Percentage(4)])
+            .constraints(constraints)
             .horizontal_margin(4)
             .split(area);
 
@@ -81,14 +89,29 @@ impl App {
         );
 
         match self.current_tab {
-            Tab::Dashboard => frame.render_widget(
-                Gauge::default()
-                    .block(Block::bordered().title("LEVEL"))
-                    .gauge_style(Style::new().cyan().on_black())
-                    .label(format!("{}/100 XP", self.total_xp))
-                    .percent(self.total_xp as u16),
-                chunks[1],
-            ),
+            Tab::Dashboard => {
+                frame.render_widget(
+                    Gauge::default()
+                        .block(Block::bordered().title("LEVEL"))
+                        .gauge_style(Style::new().red().on_black())
+                        .label(format!("{}/100 XP", self.total_xp))
+                        .percent(self.total_xp as u16),
+                    chunks[1],
+                );
+                let mut i = 2;
+                for category in self.user_config.categories.iter() {
+                    frame.render_widget(
+                        Gauge::default()
+                            .block(Block::bordered().title(category.name.to_uppercase()))
+                            .gauge_style(Style::new().cyan().on_black())
+                            .label(format!("{}/100 XP", category.xp))
+                            .percent(category.xp as u16),
+                        chunks[i],
+                    );
+
+                    i += 1;
+                }
+            }
             Tab::Workouts => {}
         }
     }
