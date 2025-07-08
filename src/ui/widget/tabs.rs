@@ -2,7 +2,7 @@
 pub enum Page {
     Dashboard,
     Workouts,
-    Exercises,
+    Exercises(i32),
 }
 
 impl Page {
@@ -10,7 +10,7 @@ impl Page {
         match self {
             Page::Dashboard => String::from("Dashboard"),
             Page::Workouts => String::from("Workouts"),
-            Page::Exercises => String::from("Exercises"),
+            Page::Exercises(_) => String::from("Exercises"),
         }
     }
 }

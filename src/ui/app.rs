@@ -1,4 +1,3 @@
-use color_eyre::owo_colors::{AnsiColors, OwoColorize};
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::{Color, Style, Styled};
@@ -25,7 +24,7 @@ pub struct App {
     user_config: UserConfig,
     exercises: HashMap<String, Exercise>,
     total_xp: i32,
-    current_tab: Page,
+    page: Page,
 }
 
 impl Default for App {
@@ -36,7 +35,7 @@ impl Default for App {
             user_config: load_user_config(),
             exercises: load_exercises(),
             total_xp: 0,
-            current_tab: Page::Dashboard,
+            page: Page::Dashboard,
         };
         app.update_stats();
 
@@ -76,11 +75,11 @@ impl App {
 
         let area = frame.area().inner(Margin::new(1, 2));
         frame.render_widget(
-            Paragraph::new(self.current_tab.name()).bold().block(block),
+            Paragraph::new(self.page.name()).bold().block(block),
             frame.area(),
         );
 
-        match self.current_tab {
+        match self.page {
             Page::Dashboard => {
                 let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
 
@@ -126,7 +125,7 @@ impl App {
                     i += 1;
                 }
             }
-            Page::Exercises => {
+            Page::Exercises(index) => {
                 let mut constraints = Vec::new();
 
                 for _ in self.exercises.iter() {
@@ -139,14 +138,18 @@ impl App {
                     .horizontal_margin(4)
                     .split(area);
 
-                let mut i = 0;
-                for (exercise_name, exercise) in self.exercises.iter() {
+                for (i, (exercise_name, exercise)) in self.exercises.iter().enumerate() {
                     frame.render_widget(
                         Paragraph::new(format!(
                             "{}: {}",
                             exercise_name.to_uppercase(),
                             exercise.xp_text()
                         ))
+                        .block(if index == i as i32 {
+                            Block::bordered().blue()
+                        } else {
+                            Block::bordered().white()
+                        })
                         .set_style(Style::new().fg(
                             match exercise.difficulty() {
                                 Difficulty::Easy => Color::Green,
@@ -157,7 +160,6 @@ impl App {
                         )),
                         chunks[i],
                     );
-                    i += 1;
                 }
             }
             _ => {}
@@ -168,12 +170,16 @@ impl App {
         match key.code {
             KeyCode::Char('q') => self.exit = true,
             KeyCode::Tab => {
-                self.current_tab = match self.current_tab {
+                self.page = match self.page {
                     Page::Dashboard => Page::Workouts,
-                    Page::Workouts => Page::Exercises,
-                    Page::Exercises => Page::Dashboard,
+                    Page::Workouts => Page::Exercises(-1),
+                    Page::Exercises(_) => Page::Dashboard,
                 }
             }
+            KeyCode::Down | KeyCode::Char('j') => match self.page {
+                Page::Exercises(_) => {}
+                _ => {}
+            },
             _ => {}
         }
     }
