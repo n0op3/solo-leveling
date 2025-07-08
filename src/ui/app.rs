@@ -1,3 +1,4 @@
+use crossterm::cursor;
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::Style;
@@ -34,6 +35,11 @@ impl Default for App {
             current_tab: Tab::Dashboard,
         };
         app.update_stats();
+
+        let custom_username = app.user_config.user.name.clone();
+        if let Some(custom_username) = custom_username {
+            app.username = custom_username;
+        }
 
         app
     }

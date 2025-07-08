@@ -29,6 +29,7 @@ impl Default for UserConfig {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct User {
+    pub name: Option<String>,
     pub level: i32,
 }
 
