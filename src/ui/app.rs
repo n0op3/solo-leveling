@@ -1,5 +1,4 @@
 use crossterm::event::{self, KeyCode, KeyEvent};
-use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Direction, Layout, Margin, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Line;
@@ -12,7 +11,6 @@ use ratatui::{
 };
 use std::collections::HashMap;
 use std::io;
-use tui_textarea::TextArea;
 
 use crate::config::{UserConfig, load_exercises, load_user_config};
 use crate::exercise::{Difficulty, Exercise};
@@ -55,7 +53,6 @@ impl Default for App {
 struct ExercisePopup {
     pub title: String,
     pub exercise: Exercise,
-    pub draw_callback: Box<dyn Fn(Rect, &mut Buffer) -> ()>,
 }
 
 impl ExercisePopup {
@@ -173,7 +170,9 @@ impl App {
                     lines.push(line);
                 }
 
-                let paragraph = Paragraph::new(lines).block(Block::new());
+                let paragraph = Paragraph::new(lines)
+                    .block(Block::new())
+                    .scroll(((index - area.height as i32 / 2).max(0) as u16, 0));
 
                 frame.render_widget(paragraph, area);
             }
@@ -210,16 +209,6 @@ impl App {
                         self.popup = Some(ExercisePopup {
                             title: name.to_uppercase(),
                             exercise: exercise.clone(),
-                            draw_callback: Box::new({
-                                let exercise = exercise.clone();
-                                let input_area = TextArea::default();
-                                move |area, buf| {
-                                    Paragraph::new(exercise.xp_text())
-                                        .centered()
-                                        .render(area, buf);
-                                    // TODO: render the input area
-                                }
-                            }),
                         })
                     }
                     None => {}
@@ -268,6 +257,9 @@ impl Widget for &ExercisePopup {
         Clear::default().render(area, buf);
         block.render(area, buf);
 
-        (self.draw_callback)(block.inner(area), buf);
+        Paragraph::new(self.exercise.xp_text())
+            .block(block.clone())
+            .centered()
+            .render(area, buf);
     }
 }
