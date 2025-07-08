@@ -251,10 +251,14 @@ impl ExercisePopup {
             | KeyCode::Char('7')
             | KeyCode::Char('8')
             | KeyCode::Char('9') => {
-                self.input.push(key.code.as_char().unwrap());
+                if self.input.len() <= 3 {
+                    self.input.push(key.code.as_char().unwrap());
+                }
             }
             KeyCode::Backspace => {
-                self.input.remove(self.input.len() - 1);
+                if !self.input.is_empty() {
+                    self.input.remove(self.input.len() - 1);
+                }
             }
             _ => {}
         }
