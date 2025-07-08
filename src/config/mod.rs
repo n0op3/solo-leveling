@@ -5,7 +5,12 @@ use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
 use toml::{Table, Value};
 
-const DEFAULT_CONFIG: &'static str = "[categories]
+const DEFAULT_CONFIG: &'static str = "
+[user]
+level = 0
+xp_threshold = 100
+
+[categories]
 strength = 0
 speed = 0
 intelligence = 0
