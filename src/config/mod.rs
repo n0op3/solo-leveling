@@ -86,7 +86,7 @@ pub fn load_exercises() -> HashMap<String, Exercise> {
                 toml::from_str(contents.as_str()).unwrap();
 
             for (name, exercise) in exercises_list.iter() {
-                exercises.insert(name.clone(), *exercise);
+                exercises.insert(name.clone(), exercise.clone());
             }
         }
     }

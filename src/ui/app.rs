@@ -171,8 +171,18 @@ impl App {
 
     fn handle_key(&mut self, key: event::KeyEvent) {
         if let Some(popup) = &mut self.popup {
-            if popup.handle_key(key) {
-                self.popup = None;
+            match popup.handle_key(key) {
+                PopupResult::Exit => self.popup = None,
+                PopupResult::AddXP { category, xp } => {
+                    self.user_config.categories.insert(
+                        category.clone(),
+                        *self.user_config.categories.get(&category).unwrap_or(&0) + xp as i32,
+                    );
+
+                    self.popup = None;
+                    self.update_stats();
+                }
+                PopupResult::None => {}
             }
             return;
         }
@@ -232,10 +242,16 @@ impl App {
     }
 }
 
+enum PopupResult {
+    None,
+    Exit,
+    AddXP { category: String, xp: usize },
+}
+
 impl ExercisePopup {
-    pub fn handle_key(&mut self, key: KeyEvent) -> bool {
+    pub fn handle_key(&mut self, key: KeyEvent) -> PopupResult {
         match &key.code {
-            KeyCode::Char('q') | KeyCode::Esc => return true,
+            KeyCode::Char('q') | KeyCode::Esc => return PopupResult::Exit,
             KeyCode::Char('0')
             | KeyCode::Char('1')
             | KeyCode::Char('2')
@@ -255,9 +271,18 @@ impl ExercisePopup {
                     self.input.remove(self.input.len() - 1);
                 }
             }
+            KeyCode::Enter => {
+                if let Ok(amount) = self.input.parse::<usize>() {
+                    return PopupResult::AddXP {
+                        category: self.exercise.category.clone(),
+                        xp: self.exercise.xp(amount),
+                    };
+                }
+            }
             _ => {}
         }
-        return false;
+
+        PopupResult::None
     }
 }
 

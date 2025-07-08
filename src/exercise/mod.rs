@@ -7,9 +7,10 @@ pub enum ExerciseType {
     Static,
 }
 
-#[derive(Debug, Deserialize, Clone, Copy)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Exercise {
     pub xp: usize,
+    pub category: String,
     pub time: Option<i32>,
 }
 
