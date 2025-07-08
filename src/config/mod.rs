@@ -8,7 +8,6 @@ use toml::{Table, Value};
 const DEFAULT_CONFIG: &'static str = "
 [user]
 level = 0
-xp_threshold = 100
 
 [categories]
 strength = 0
@@ -18,6 +17,7 @@ intelligence = 0
 
 #[derive(Debug, Default)]
 pub struct UserConfig {
+    pub level: usize,
     pub categories: Vec<Category>,
 }
 

@@ -12,6 +12,7 @@ use ratatui::{
 use std::io;
 
 use crate::config::{UserConfig, load_user_config};
+use crate::level::levelup_requirement;
 use crate::ui::widget::tabs::Tab;
 
 #[derive(Debug)]
@@ -94,7 +95,11 @@ impl App {
                     Gauge::default()
                         .block(Block::bordered().title("LEVEL"))
                         .gauge_style(Style::new().red().on_black())
-                        .label(format!("{}/100 XP", self.total_xp))
+                        .label(format!(
+                            "{}/{} XP",
+                            self.total_xp,
+                            levelup_requirement(self.user_config.level)
+                        ))
                         .percent(self.total_xp as u16),
                     chunks[1],
                 );
