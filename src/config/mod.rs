@@ -1,28 +1,32 @@
 use crate::exercise::ExerciseTemplate;
 use dirs_next::config_dir;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
 use toml::Value;
 
-const DEFAULT_CONFIG: &'static str = "
-[user]
-level = 0
-
-[categories]
-strength = 0
-speed = 0
-intelligence = 0
-";
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UserConfig {
     pub user: User,
     pub categories: HashMap<String, i32>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Default for UserConfig {
+    fn default() -> Self {
+        Self {
+            user: User::default(),
+            categories: [
+                (String::from("intelligence"), 0),
+                (String::from("strength"), 0),
+                (String::from("speed"), 0),
+            ]
+            .into(),
+        }
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct User {
     pub level: i32,
 }
@@ -59,7 +63,12 @@ fn create_default_config() {
     config_path.push("config.toml");
     if !config_path.exists() {
         File::create(&config_path).expect("Failed to create the config file");
-        fs::write(config_path, DEFAULT_CONFIG).expect("Failed to write the config file");
+        fs::write(
+            config_path,
+            toml::ser::to_string(&UserConfig::default())
+                .expect("Failed to create the default config"),
+        )
+        .expect("Failed to write the config file");
     }
 }
 
