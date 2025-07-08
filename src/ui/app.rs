@@ -1,4 +1,4 @@
-use crossterm::event::{self, KeyCode};
+use crossterm::event::{self, KeyCode, KeyEvent};
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Direction, Layout, Margin, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -56,6 +56,18 @@ struct ExercisePopup {
     pub title: String,
     pub exercise: Exercise,
     pub draw_callback: Box<dyn Fn(Rect, &mut Buffer) -> ()>,
+}
+
+impl ExercisePopup {
+    pub fn handle_key(&mut self, key: KeyEvent) -> bool {
+        match &key.code {
+            KeyCode::Down | KeyCode::Char('j') => {}
+            KeyCode::Up | KeyCode::Char('k') => {}
+            KeyCode::Char('q') | KeyCode::Esc => return true,
+            _ => {}
+        }
+        return false;
+    }
 }
 
 impl App {
@@ -175,14 +187,15 @@ impl App {
     }
 
     fn handle_key(&mut self, key: event::KeyEvent) {
-        match key.code {
-            KeyCode::Char('q') => {
-                if self.popup.is_some() {
-                    self.popup = None;
-                } else {
-                    self.exit = true;
-                }
+        if let Some(popup) = &mut self.popup {
+            if popup.handle_key(key) {
+                self.popup = None;
             }
+            return;
+        }
+
+        match key.code {
+            KeyCode::Char('q') => self.exit = true,
             KeyCode::Esc => self.popup = None,
             KeyCode::Tab => {
                 self.page = match self.page {
