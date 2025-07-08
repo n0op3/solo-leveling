@@ -1,14 +1,16 @@
 #[derive(Debug, Clone)]
-pub enum Tab {
+pub enum Page {
     Dashboard,
     Workouts,
+    Exercises,
 }
 
-impl Tab {
+impl Page {
     pub fn name(&self) -> String {
         match self {
-            Tab::Dashboard => String::from("Dashboard"),
-            Tab::Workouts => String::from("Workouts"),
+            Page::Dashboard => String::from("Dashboard"),
+            Page::Workouts => String::from("Workouts"),
+            Page::Exercises => String::from("Exercises"),
         }
     }
 }

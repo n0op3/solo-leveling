@@ -1,4 +1,3 @@
-use crossterm::cursor;
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::Style;
@@ -14,7 +13,7 @@ use std::io;
 
 use crate::config::{UserConfig, load_user_config};
 use crate::level::levelup_requirement;
-use crate::ui::widget::tabs::Tab;
+use crate::ui::widget::tabs::Page;
 
 #[derive(Debug)]
 pub struct App {
@@ -22,7 +21,7 @@ pub struct App {
     username: String,
     user_config: UserConfig,
     total_xp: i32,
-    current_tab: Tab,
+    current_tab: Page,
 }
 
 impl Default for App {
@@ -32,7 +31,7 @@ impl Default for App {
             username: whoami::realname(),
             user_config: load_user_config(),
             total_xp: 0,
-            current_tab: Tab::Dashboard,
+            current_tab: Page::Dashboard,
         };
         app.update_stats();
 
@@ -99,7 +98,7 @@ impl App {
         );
 
         match self.current_tab {
-            Tab::Dashboard => {
+            Page::Dashboard => {
                 frame.render_widget(
                     Gauge::default()
                         .block(Block::bordered().title("LEVEL"))
@@ -126,7 +125,7 @@ impl App {
                     i += 1;
                 }
             }
-            Tab::Workouts => {}
+            _ => {}
         }
     }
 
@@ -135,8 +134,9 @@ impl App {
             KeyCode::Char('q') => self.exit = true,
             KeyCode::Tab => {
                 self.current_tab = match self.current_tab {
-                    Tab::Dashboard => Tab::Workouts,
-                    Tab::Workouts => Tab::Dashboard,
+                    Page::Dashboard => Page::Workouts,
+                    Page::Workouts => Page::Exercises,
+                    Page::Exercises => Page::Dashboard,
                 }
             }
             _ => {}
