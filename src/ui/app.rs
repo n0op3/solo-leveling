@@ -1,8 +1,9 @@
 use crossterm::event::{self, KeyCode};
-use ratatui::layout::{Constraint, Direction, Layout, Margin};
+use ratatui::buffer::Buffer;
+use ratatui::layout::{Constraint, Direction, Layout, Margin, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Line;
-use ratatui::widgets::Gauge;
+use ratatui::widgets::{Clear, Gauge, Widget};
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
@@ -11,18 +12,20 @@ use ratatui::{
 };
 use std::collections::HashMap;
 use std::io;
+use tui_textarea::TextArea;
 
 use crate::config::{UserConfig, load_exercises, load_user_config};
 use crate::exercise::{Difficulty, Exercise};
 use crate::level::levelup_requirement;
+use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
 
-#[derive(Debug)]
 pub struct App {
     exit: bool,
     username: String,
     user_config: UserConfig,
     exercises: HashMap<String, Exercise>,
+    popup: Option<ExercisePopup>,
     total_xp: i32,
     page: Page,
 }
@@ -34,6 +37,7 @@ impl Default for App {
             username: whoami::realname(),
             user_config: load_user_config(),
             exercises: load_exercises(),
+            popup: None,
             total_xp: 0,
             page: Page::Dashboard,
         };
@@ -46,6 +50,12 @@ impl Default for App {
 
         app
     }
+}
+
+struct ExercisePopup {
+    pub title: String,
+    pub exercise: Exercise,
+    pub draw_callback: Box<dyn Fn(Rect, &mut Buffer) -> ()>,
 }
 
 impl App {
@@ -63,7 +73,7 @@ impl App {
         let title = Line::from(" The System ".bold());
         let instructions = Line::from(vec![
             " Quit ".into(),
-            "<Q> ".blue().bold(),
+            "<q> ".blue().bold(),
             " Next page ".into(),
             "<Tab> ".blue().bold(),
         ]);
@@ -157,11 +167,23 @@ impl App {
             }
             _ => {}
         }
+
+        if let Some(popup) = &self.popup {
+            let area = popup_area(area, 60, 40);
+            frame.render_widget(popup, area);
+        }
     }
 
     fn handle_key(&mut self, key: event::KeyEvent) {
         match key.code {
-            KeyCode::Char('q') => self.exit = true,
+            KeyCode::Char('q') => {
+                if self.popup.is_some() {
+                    self.popup = None;
+                } else {
+                    self.exit = true;
+                }
+            }
+            KeyCode::Esc => self.popup = None,
             KeyCode::Tab => {
                 self.page = match self.page {
                     Page::Dashboard => Page::Workouts,
@@ -169,6 +191,28 @@ impl App {
                     Page::Exercises(_) => Page::Dashboard,
                 }
             }
+            KeyCode::Enter => match self.page {
+                Page::Exercises(i) => match self.exercises.iter().nth(i as usize) {
+                    Some((name, exercise)) => {
+                        self.popup = Some(ExercisePopup {
+                            title: name.to_uppercase(),
+                            exercise: exercise.clone(),
+                            draw_callback: Box::new({
+                                let exercise = exercise.clone();
+                                let input_area = TextArea::default();
+                                move |area, buf| {
+                                    Paragraph::new(exercise.xp_text())
+                                        .centered()
+                                        .render(area, buf);
+                                    // TODO: render the input area
+                                }
+                            }),
+                        })
+                    }
+                    None => {}
+                },
+                _ => {}
+            },
             KeyCode::Down | KeyCode::Char('j') => match &mut self.page {
                 Page::Exercises(i) => {
                     if *i == self.exercises.len() as i32 {
@@ -198,5 +242,19 @@ impl App {
         for (_category, xp) in self.user_config.categories.iter() {
             self.total_xp += xp;
         }
+    }
+}
+
+impl Widget for &ExercisePopup {
+    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
+    where
+        Self: Sized,
+    {
+        let block = &Block::bordered().title(self.title.clone()).cyan();
+
+        Clear::default().render(area, buf);
+        block.render(area, buf);
+
+        (self.draw_callback)(block.inner(area), buf);
     }
 }
