@@ -17,9 +17,10 @@ impl Default for UserConfig {
         Self {
             user: User::default(),
             categories: [
-                (String::from("intelligence"), 0),
                 (String::from("strength"), 0),
                 (String::from("speed"), 0),
+                (String::from("intelligence"), 0),
+                (String::from("social skills"), 0),
             ]
             .into(),
         }
