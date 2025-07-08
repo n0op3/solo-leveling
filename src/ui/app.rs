@@ -1,6 +1,7 @@
+use color_eyre::owo_colors::{AnsiColors, OwoColorize};
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
-use ratatui::style::Style;
+use ratatui::style::{Color, Style, Styled};
 use ratatui::text::Line;
 use ratatui::widgets::Gauge;
 use ratatui::{
@@ -9,9 +10,11 @@ use ratatui::{
     symbols::border,
     widgets::{Block, Paragraph},
 };
+use std::collections::HashMap;
 use std::io;
 
-use crate::config::{UserConfig, load_user_config};
+use crate::config::{UserConfig, load_exercises, load_user_config};
+use crate::exercise::{Difficulty, Exercise};
 use crate::level::levelup_requirement;
 use crate::ui::widget::tabs::Page;
 
@@ -20,6 +23,7 @@ pub struct App {
     exit: bool,
     username: String,
     user_config: UserConfig,
+    exercises: HashMap<String, Exercise>,
     total_xp: i32,
     current_tab: Page,
 }
@@ -30,6 +34,7 @@ impl Default for App {
             exit: false,
             username: whoami::realname(),
             user_config: load_user_config(),
+            exercises: load_exercises(),
             total_xp: 0,
             current_tab: Page::Dashboard,
         };
@@ -69,36 +74,32 @@ impl App {
             .title_bottom(instructions.centered())
             .border_set(border::THICK);
 
-        let area = frame.area().inner(Margin::new(1, 1));
-
-        let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
-
-        {
-            for _category in self.user_config.categories.iter() {
-                constraints.push(Constraint::Max(3));
-            }
-        }
-
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(constraints)
-            .horizontal_margin(4)
-            .split(area);
-
+        let area = frame.area().inner(Margin::new(1, 2));
         frame.render_widget(
             Paragraph::new(self.current_tab.name()).bold().block(block),
             frame.area(),
         );
 
-        frame.render_widget(
-            Paragraph::new(format!("Welcome, {}", self.username))
-                .style(Style::default().white())
-                .centered(),
-            chunks[0],
-        );
-
         match self.current_tab {
             Page::Dashboard => {
+                let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
+
+                for _category in self.user_config.categories.iter() {
+                    constraints.push(Constraint::Max(3));
+                }
+
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints(constraints)
+                    .horizontal_margin(4)
+                    .split(area);
+
+                frame.render_widget(
+                    Paragraph::new(format!("Welcome, {}", self.username))
+                        .style(Style::default().white())
+                        .centered(),
+                    chunks[0],
+                );
                 frame.render_widget(
                     Gauge::default()
                         .block(Block::bordered().title("LEVEL"))
@@ -116,12 +117,46 @@ impl App {
                     frame.render_widget(
                         Gauge::default()
                             .block(Block::bordered().title(category.to_uppercase()))
-                            .gauge_style(Style::new().cyan().on_black())
+                            .gauge_style(Style::new().cyan())
                             .label(format!("{xp}/100 XP"))
                             .percent(*xp as u16),
                         chunks[i],
                     );
 
+                    i += 1;
+                }
+            }
+            Page::Exercises => {
+                let mut constraints = Vec::new();
+
+                for _ in self.exercises.iter() {
+                    constraints.push(Constraint::Max(3));
+                }
+
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints(constraints)
+                    .horizontal_margin(4)
+                    .split(area);
+
+                let mut i = 0;
+                for (exercise_name, exercise) in self.exercises.iter() {
+                    frame.render_widget(
+                        Paragraph::new(format!(
+                            "{}: {}",
+                            exercise_name.to_uppercase(),
+                            exercise.xp_text()
+                        ))
+                        .set_style(Style::new().fg(
+                            match exercise.difficulty() {
+                                Difficulty::Easy => Color::Green,
+                                Difficulty::Normal => Color::Yellow,
+                                Difficulty::Difficult => Color::Red,
+                                Difficulty::Extreme => Color::Magenta,
+                            },
+                        )),
+                        chunks[i],
+                    );
                     i += 1;
                 }
             }

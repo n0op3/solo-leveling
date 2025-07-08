@@ -1,10 +1,9 @@
-use crate::exercise::ExerciseTemplate;
+use crate::exercise::Exercise;
 use dirs_next::config_dir;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::{self, File, read_dir, read_to_string};
 use std::path::PathBuf;
-use toml::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserConfig {
@@ -18,7 +17,6 @@ impl Default for UserConfig {
             user: User::default(),
             categories: [
                 (String::from("strength"), 0),
-                (String::from("speed"), 0),
                 (String::from("intelligence"), 0),
                 (String::from("social skills"), 0),
             ]
@@ -74,7 +72,7 @@ fn create_default_config() {
     }
 }
 
-pub fn load_exercises() -> HashMap<String, ExerciseTemplate> {
+pub fn load_exercises() -> HashMap<String, Exercise> {
     let mut exercises = HashMap::new();
 
     let mut exercise_path = get_config_dir();
@@ -84,31 +82,11 @@ pub fn load_exercises() -> HashMap<String, ExerciseTemplate> {
         let file = file.unwrap();
         if file.path().is_file() && file.path().extension().unwrap_or_default() == "toml" {
             let contents = read_to_string(file.path()).unwrap();
-            let exercises_list: Value = toml::from_str(contents.as_str()).unwrap();
-            for (exercise_name, value) in exercises_list
-                .as_table()
-                .expect("config file is not a table of exercises")
-            {
-                let xp = value.get("xp").unwrap_or(&Value::Integer(1));
-                let rep = Value::String(String::from("rep"));
-                let exercise_type = value.get("type").unwrap_or(&rep);
+            let exercises_list: HashMap<String, Exercise> =
+                toml::from_str(contents.as_str()).unwrap();
 
-                let exercise = match exercise_type.as_str().unwrap() {
-                    "rep" => Some(ExerciseTemplate::Dynamic {
-                        xp: xp.as_integer().unwrap() as usize,
-                    }),
-                    "timed" => Some(ExerciseTemplate::Static {
-                        xp: xp.as_integer().unwrap() as usize,
-                    }),
-                    _ => {
-                        println!("Unknown exercise type: {exercise_type}");
-                        None
-                    }
-                };
-
-                if let Some(exercise) = exercise {
-                    exercises.insert(exercise_name.clone(), exercise);
-                }
+            for (name, exercise) in exercises_list.iter() {
+                exercises.insert(name.clone(), *exercise);
             }
         }
     }
