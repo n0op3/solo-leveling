@@ -51,7 +51,7 @@ impl Exercise {
             0..=2 => Difficulty::Easy,
             3..=5 => Difficulty::Normal,
             6..=10 => Difficulty::Difficult,
-            _ => Difficulty::Difficult,
+            _ => Difficulty::Extreme,
         }
     }
 }
