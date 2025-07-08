@@ -1,6 +1,6 @@
 use crossterm::event::{self, KeyCode};
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
-use ratatui::style::{Color, Style, Styled};
+use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Line;
 use ratatui::widgets::Gauge;
 use ratatui::{
@@ -79,6 +79,7 @@ impl App {
             frame.area(),
         );
 
+        let area = area.inner(Margin::new(4, 0));
         match self.page {
             Page::Dashboard => {
                 let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
@@ -90,7 +91,6 @@ impl App {
                 let chunks = Layout::default()
                     .direction(Direction::Vertical)
                     .constraints(constraints)
-                    .horizontal_margin(4)
                     .split(area);
 
                 frame.render_widget(
@@ -111,56 +111,49 @@ impl App {
                         .percent(self.total_xp as u16),
                     chunks[1],
                 );
-                let mut i = 2;
-                for (category, xp) in self.user_config.categories.iter() {
+
+                for (i, (category, xp)) in self.user_config.categories.iter().enumerate() {
                     frame.render_widget(
                         Gauge::default()
                             .block(Block::bordered().title(category.to_uppercase()))
                             .gauge_style(Style::new().cyan())
                             .label(format!("{xp}/100 XP"))
                             .percent(*xp as u16),
-                        chunks[i],
+                        chunks[i + 2],
                     );
-
-                    i += 1;
                 }
             }
             Page::Exercises(index) => {
-                let mut constraints = Vec::new();
-
-                for _ in self.exercises.iter() {
-                    constraints.push(Constraint::Max(3));
-                }
-
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .constraints(constraints)
-                    .horizontal_margin(4)
-                    .split(area);
+                let mut lines = Vec::new();
 
                 for (i, (exercise_name, exercise)) in self.exercises.iter().enumerate() {
-                    frame.render_widget(
-                        Paragraph::new(format!(
-                            "{}: {}",
+                    let style = Style::new().fg(match exercise.difficulty() {
+                        Difficulty::Easy => Color::Green,
+                        Difficulty::Normal => Color::Yellow,
+                        Difficulty::Difficult => Color::Red,
+                        Difficulty::Extreme => Color::Magenta,
+                    });
+
+                    let line = Line::styled(
+                        format!(
+                            "{} {}: {}",
+                            if index == i as i32 { ">>" } else { "  " },
                             exercise_name.to_uppercase(),
                             exercise.xp_text()
-                        ))
-                        .block(if index == i as i32 {
-                            Block::bordered().blue()
+                        ),
+                        if index == i as i32 {
+                            style.add_modifier(Modifier::BOLD)
                         } else {
-                            Block::bordered().white()
-                        })
-                        .set_style(Style::new().fg(
-                            match exercise.difficulty() {
-                                Difficulty::Easy => Color::Green,
-                                Difficulty::Normal => Color::Yellow,
-                                Difficulty::Difficult => Color::Red,
-                                Difficulty::Extreme => Color::Magenta,
-                            },
-                        )),
-                        chunks[i],
+                            style
+                        },
                     );
+
+                    lines.push(line);
                 }
+
+                let paragraph = Paragraph::new(lines).block(Block::new());
+
+                frame.render_widget(paragraph, area);
             }
             _ => {}
         }
@@ -172,12 +165,28 @@ impl App {
             KeyCode::Tab => {
                 self.page = match self.page {
                     Page::Dashboard => Page::Workouts,
-                    Page::Workouts => Page::Exercises(-1),
+                    Page::Workouts => Page::Exercises(0),
                     Page::Exercises(_) => Page::Dashboard,
                 }
             }
-            KeyCode::Down | KeyCode::Char('j') => match self.page {
-                Page::Exercises(_) => {}
+            KeyCode::Down | KeyCode::Char('j') => match &mut self.page {
+                Page::Exercises(i) => {
+                    if *i == self.exercises.len() as i32 {
+                        *i = 0;
+                    } else {
+                        *i += 1;
+                    }
+                }
+                _ => {}
+            },
+            KeyCode::Up | KeyCode::Char('k') => match &mut self.page {
+                Page::Exercises(i) => {
+                    if *i == -1 {
+                        *i = self.exercises.len() as i32 - 1;
+                    } else {
+                        *i -= 1;
+                    }
+                }
                 _ => {}
             },
             _ => {}
