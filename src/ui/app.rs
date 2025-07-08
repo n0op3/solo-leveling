@@ -52,19 +52,8 @@ impl Default for App {
 
 struct ExercisePopup {
     pub title: String,
+    input: String,
     pub exercise: Exercise,
-}
-
-impl ExercisePopup {
-    pub fn handle_key(&mut self, key: KeyEvent) -> bool {
-        match &key.code {
-            KeyCode::Down | KeyCode::Char('j') => {}
-            KeyCode::Up | KeyCode::Char('k') => {}
-            KeyCode::Char('q') | KeyCode::Esc => return true,
-            _ => {}
-        }
-        return false;
-    }
 }
 
 impl App {
@@ -208,6 +197,7 @@ impl App {
                     Some((name, exercise)) => {
                         self.popup = Some(ExercisePopup {
                             title: name.to_uppercase(),
+                            input: String::from("20"),
                             exercise: exercise.clone(),
                         })
                     }
@@ -247,6 +237,31 @@ impl App {
     }
 }
 
+impl ExercisePopup {
+    pub fn handle_key(&mut self, key: KeyEvent) -> bool {
+        match &key.code {
+            KeyCode::Char('q') | KeyCode::Esc => return true,
+            KeyCode::Char('0')
+            | KeyCode::Char('1')
+            | KeyCode::Char('2')
+            | KeyCode::Char('3')
+            | KeyCode::Char('4')
+            | KeyCode::Char('5')
+            | KeyCode::Char('6')
+            | KeyCode::Char('7')
+            | KeyCode::Char('8')
+            | KeyCode::Char('9') => {
+                self.input.push(key.code.as_char().unwrap());
+            }
+            KeyCode::Backspace => {
+                self.input.remove(self.input.len() - 1);
+            }
+            _ => {}
+        }
+        return false;
+    }
+}
+
 impl Widget for &ExercisePopup {
     fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
     where
@@ -257,7 +272,7 @@ impl Widget for &ExercisePopup {
         Clear::default().render(area, buf);
         block.render(area, buf);
 
-        Paragraph::new(self.exercise.xp_text())
+        Paragraph::new(self.input.clone())
             .block(block.clone())
             .centered()
             .render(area, buf);
