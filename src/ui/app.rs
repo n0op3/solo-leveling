@@ -273,7 +273,11 @@ impl Widget for &ExercisePopup {
 
         let layout = Layout::new(
             Direction::Vertical,
-            [Constraint::Fill(1), Constraint::Length(1)],
+            [
+                Constraint::Fill(1),
+                Constraint::Length(1),
+                Constraint::Length(1),
+            ],
         )
         .split(area.inner(Margin::new(1, 1)));
 
@@ -282,9 +286,17 @@ impl Widget for &ExercisePopup {
             .centered()
             .render(layout[0], buf);
 
+        if self.input.parse::<i32>().is_err() {
+            Paragraph::new("Please provide input")
+                .red()
+                .bold()
+                .centered()
+                .render(layout[1], buf);
+        }
+
         Paragraph::new("Press Enter to confirm, q/Esc to cancel")
             .dark_gray()
             .centered()
-            .render(layout[1], buf);
+            .render(layout[2], buf);
     }
 }
