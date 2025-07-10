@@ -202,6 +202,33 @@ impl App {
             return;
         }
 
+        match &mut self.page {
+            Page::Exercises(i) => match key.code {
+                KeyCode::Enter => match self.exercises.iter().nth(*i as usize) {
+                    Some((name, exercise)) => {
+                        self.popup = Some(ExercisePopup::new(name.to_uppercase(), exercise))
+                    }
+                    None => {}
+                },
+                KeyCode::Down | KeyCode::Char('j') => {
+                    if *i == self.exercises.len() as i32 {
+                        *i = 0;
+                    } else {
+                        *i += 1;
+                    }
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    if *i == -1 {
+                        *i = self.exercises.len() as i32 - 1;
+                    } else {
+                        *i -= 1;
+                    }
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+
         match key.code {
             KeyCode::Char('q') => self.exit = true,
             KeyCode::Esc => self.popup = None,
@@ -212,35 +239,6 @@ impl App {
                     Page::Exercises(_) => Page::Dashboard,
                 }
             }
-            KeyCode::Enter => match self.page {
-                Page::Exercises(i) => match self.exercises.iter().nth(i as usize) {
-                    Some((name, exercise)) => {
-                        self.popup = Some(ExercisePopup::new(name.to_uppercase(), exercise))
-                    }
-                    None => {}
-                },
-                _ => {}
-            },
-            KeyCode::Down | KeyCode::Char('j') => match &mut self.page {
-                Page::Exercises(i) => {
-                    if *i == self.exercises.len() as i32 {
-                        *i = 0;
-                    } else {
-                        *i += 1;
-                    }
-                }
-                _ => {}
-            },
-            KeyCode::Up | KeyCode::Char('k') => match &mut self.page {
-                Page::Exercises(i) => {
-                    if *i == -1 {
-                        *i = self.exercises.len() as i32 - 1;
-                    } else {
-                        *i -= 1;
-                    }
-                }
-                _ => {}
-            },
             _ => {}
         }
     }
