@@ -2,7 +2,9 @@ use std::io;
 
 use crate::ui::app::App;
 
+pub mod category;
 pub mod config;
+pub mod data;
 pub mod level;
 mod ui;
 

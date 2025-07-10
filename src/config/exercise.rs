@@ -1,7 +1,6 @@
 use crate::config::get_config_dir;
-use crate::level::Level;
 use ratatui::style::Color;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{read_dir, read_to_string};
 
@@ -24,18 +23,6 @@ pub enum Difficulty {
     Normal,
     Difficult,
     Extreme,
-}
-
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct Category {
-    pub level: Level,
-    name: String,
-}
-
-impl Category {
-    pub fn name(&self) -> &String {
-        &self.name
-    }
 }
 
 pub fn load_exercises() -> HashMap<String, Exercise> {

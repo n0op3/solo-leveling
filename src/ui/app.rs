@@ -12,9 +12,12 @@ use ratatui::{
 use std::collections::HashMap;
 use std::io;
 
+use crate::category::Category;
+use crate::config::exercise::Exercise;
 use crate::config::exercise::load_exercises;
-use crate::config::exercise::{Category, Exercise};
-use crate::config::user::{self, UserConfig, load_user_config};
+use crate::config::user::{UserConfig, load_user_config};
+use crate::data;
+use crate::data::user::{UserData, load_user_data};
 use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
 
@@ -22,6 +25,7 @@ pub struct App {
     exit: bool,
     username: String,
     user_config: UserConfig,
+    user_data: UserData,
     exercises: HashMap<String, Exercise>,
     popup: Option<ExercisePopup>,
     page: Page,
@@ -33,12 +37,13 @@ impl Default for App {
             exit: false,
             username: whoami::realname(),
             user_config: load_user_config(),
+            user_data: load_user_data(),
             exercises: load_exercises(),
             popup: None,
             page: Page::Dashboard,
         };
 
-        let custom_username = app.user_config.user.name.clone();
+        let custom_username = app.user_config.name.clone();
         if let Some(custom_username) = custom_username {
             app.username = custom_username;
         }
@@ -89,7 +94,7 @@ impl App {
             Page::Dashboard => {
                 let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
 
-                for _category in self.user_config.categories.iter() {
+                for _category in self.user_data.categories.iter() {
                     constraints.push(Constraint::Max(3));
                 }
 
@@ -108,16 +113,15 @@ impl App {
                     Gauge::default()
                         .block(
                             Block::bordered()
-                                .title(format!("LEVEL {}", self.user_config.user.level.level())),
+                                .title(format!("LEVEL {}", self.user_data.level.level())),
                         )
                         .gauge_style(Style::new().red())
-                        .label(self.user_config.user.level.xp_text())
-                        .percent((self.user_config.user.level.percentage() * 100.0) as u16),
+                        .label(self.user_data.level.xp_text())
+                        .percent((self.user_data.level.percentage() * 100.0) as u16),
                     chunks[1],
                 );
 
-                for (i, (category_name, category)) in self.user_config.categories.iter().enumerate()
-                {
+                for (i, (category_name, category)) in self.user_data.categories.iter().enumerate() {
                     frame.render_widget(
                         Gauge::default()
                             .block(Block::bordered().title(format!(
@@ -179,21 +183,21 @@ impl App {
             match popup.handle_key(key) {
                 PopupResult::Exit => self.popup = None,
                 PopupResult::AddXP { category, xp } => {
-                    if !self.user_config.categories.contains_key(&category) {
-                        self.user_config
+                    if !self.user_data.categories.contains_key(&category) {
+                        self.user_data
                             .categories
                             .insert(category.clone(), Category::default());
                     }
 
-                    self.user_config
+                    self.user_data
                         .categories
                         .get_mut(&category)
                         .unwrap()
                         .level
                         .add_xp(xp);
 
-                    self.user_config.user.level.add_xp(xp);
-                    user::write_config(&self.user_config);
+                    self.user_data.level.add_xp(xp);
+                    data::user::write_data(&self.user_data);
 
                     self.popup = None;
                 }
