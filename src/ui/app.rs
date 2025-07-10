@@ -1,8 +1,9 @@
-use crossterm::event::{self, KeyCode, KeyEvent};
-use ratatui::layout::{Constraint, Direction, Layout, Margin, Rect};
+use crossterm::event;
+use crossterm::event::KeyCode;
+use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::Line;
-use ratatui::widgets::{Clear, Gauge, Widget};
+use ratatui::widgets::Gauge;
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
@@ -19,6 +20,7 @@ use crate::config::user::{UserConfig, load_user_config};
 use crate::data;
 use crate::data::user::{UserData, load_user_data};
 use crate::ui::popup_area;
+use crate::ui::widget::exercise_popup::{ExercisePopup, PopupResult};
 use crate::ui::widget::tabs::Page;
 
 pub struct App {
@@ -50,12 +52,6 @@ impl Default for App {
 
         app
     }
-}
-
-struct ExercisePopup {
-    pub title: String,
-    input: String,
-    pub exercise: Exercise,
 }
 
 impl App {
@@ -219,11 +215,7 @@ impl App {
             KeyCode::Enter => match self.page {
                 Page::Exercises(i) => match self.exercises.iter().nth(i as usize) {
                     Some((name, exercise)) => {
-                        self.popup = Some(ExercisePopup {
-                            title: name.to_uppercase(),
-                            input: String::from("20"),
-                            exercise: exercise.clone(),
-                        })
+                        self.popup = Some(ExercisePopup::new(name.to_uppercase(), exercise))
                     }
                     None => {}
                 },
@@ -251,89 +243,5 @@ impl App {
             },
             _ => {}
         }
-    }
-}
-
-enum PopupResult {
-    None,
-    Exit,
-    AddXP { category: String, xp: i32 },
-}
-
-impl ExercisePopup {
-    pub fn handle_key(&mut self, key: KeyEvent) -> PopupResult {
-        match &key.code {
-            KeyCode::Char('q') | KeyCode::Esc => return PopupResult::Exit,
-            KeyCode::Char('0')
-            | KeyCode::Char('1')
-            | KeyCode::Char('2')
-            | KeyCode::Char('3')
-            | KeyCode::Char('4')
-            | KeyCode::Char('5')
-            | KeyCode::Char('6')
-            | KeyCode::Char('7')
-            | KeyCode::Char('8')
-            | KeyCode::Char('9') => {
-                if self.input.len() < 3 {
-                    self.input.push(key.code.as_char().unwrap());
-                }
-            }
-            KeyCode::Backspace => {
-                if !self.input.is_empty() {
-                    self.input.remove(self.input.len() - 1);
-                }
-            }
-            KeyCode::Enter => {
-                if let Ok(amount) = self.input.parse::<i32>() {
-                    return PopupResult::AddXP {
-                        category: self.exercise.category.clone(),
-                        xp: self.exercise.xp(amount) as i32,
-                    };
-                }
-            }
-            _ => {}
-        }
-
-        PopupResult::None
-    }
-}
-
-impl Widget for &ExercisePopup {
-    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
-    where
-        Self: Sized,
-    {
-        let block = &Block::bordered().title(self.title.clone()).cyan();
-
-        Clear::default().render(area, buf);
-        block.render(area, buf);
-
-        let layout = Layout::new(
-            Direction::Vertical,
-            [
-                Constraint::Fill(1),
-                Constraint::Length(1),
-                Constraint::Length(1),
-            ],
-        )
-        .split(area.inner(Margin::new(1, 1)));
-
-        Paragraph::new(self.input.clone())
-            .fg(self.exercise.color())
-            .centered()
-            .render(layout[0], buf);
-
-        if self.input.parse::<i32>().is_err() {
-            Paragraph::new("Please provide input")
-                .red()
-                .bold()
-                .centered()
-                .render(layout[1], buf);
-        }
-
-        Paragraph::new("Press Enter to confirm, q/Esc to cancel")
-            .dark_gray()
-            .centered()
-            .render(layout[2], buf);
     }
 }

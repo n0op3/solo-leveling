@@ -6,7 +6,7 @@ pub mod category;
 pub mod config;
 pub mod data;
 pub mod level;
-mod ui;
+pub mod ui;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
