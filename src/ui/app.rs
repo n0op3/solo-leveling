@@ -15,7 +15,6 @@ use std::io;
 use crate::config::exercise::load_exercises;
 use crate::config::exercise::{Category, Exercise};
 use crate::config::user::{UserConfig, load_user_config};
-use crate::level::levelup_requirement;
 use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
 
@@ -109,14 +108,13 @@ impl App {
                 );
                 frame.render_widget(
                     Gauge::default()
-                        .block(Block::bordered().title("LEVEL"))
+                        .block(
+                            Block::bordered()
+                                .title(format!("LEVEL {}", self.user_config.user.level.level())),
+                        )
                         .gauge_style(Style::new().red())
-                        .label(format!(
-                            "{}/{} XP",
-                            self.total_xp,
-                            levelup_requirement(self.user_config.user.level)
-                        ))
-                        .percent(self.total_xp as u16),
+                        .label(self.user_config.user.level.xp_text())
+                        .percent((self.user_config.user.level.percentage() * 100.0) as u16),
                     chunks[1],
                 );
 
@@ -124,18 +122,18 @@ impl App {
                 {
                     frame.render_widget(
                         Gauge::default()
-                            .block(Block::bordered().title(category_name.to_uppercase()))
+                            .block(Block::bordered().title(format!(
+                                "{} LVL {}",
+                                category_name.to_uppercase(),
+                                category.level.level()
+                            )))
                             .gauge_style(Style::new().cyan())
                             .label(format!(
                                 "{}/{} XP",
-                                category.xp(),
-                                levelup_requirement(category.level())
+                                category.level.xp(),
+                                category.level.levelup_requirement()
                             ))
-                            .percent(
-                                (category.xp() as f32
-                                    / levelup_requirement(category.level()) as f32
-                                    * 100.0) as u16,
-                            ),
+                            .percent((category.level.percentage() * 100.0) as u16),
                         chunks[i + 2],
                     );
                 }
@@ -193,7 +191,10 @@ impl App {
                         .categories
                         .get_mut(&category)
                         .unwrap()
+                        .level
                         .add_xp(xp);
+
+                    self.user_config.user.level.add_xp(xp);
 
                     self.popup = None;
                 }

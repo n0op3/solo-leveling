@@ -1,4 +1,7 @@
-use crate::config::{exercise::Category, get_config_dir};
+use crate::{
+    config::{exercise::Category, get_config_dir},
+    level::Level,
+};
 use std::{
     collections::HashMap,
     fs::{self, File, read_to_string},
@@ -16,8 +19,7 @@ pub struct UserConfig {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct User {
     pub name: Option<String>,
-    pub level: i32,
-    pub xp: i32,
+    pub level: Level,
 }
 
 pub fn load_user_config() -> UserConfig {

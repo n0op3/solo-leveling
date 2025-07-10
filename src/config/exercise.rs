@@ -1,5 +1,5 @@
 use crate::config::get_config_dir;
-use crate::level::levelup_requirement;
+use crate::level::Level;
 use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -28,31 +28,13 @@ pub enum Difficulty {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Category {
-    level: i32,
-    xp: i32,
+    pub level: Level,
+    name: String,
 }
 
 impl Category {
-    pub fn level(&self) -> i32 {
-        self.level
-    }
-
-    pub fn xp(&self) -> i32 {
-        self.xp
-    }
-
-    pub fn add_xp(&mut self, mut xp: i32) {
-        while xp >= levelup_requirement(self.level) - self.xp {
-            xp -= levelup_requirement(self.level) - self.xp;
-            self.level_up();
-        }
-
-        self.xp += xp;
-    }
-
-    pub fn level_up(&mut self) {
-        self.level += 1;
-        self.xp = 0;
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
 
