@@ -23,6 +23,10 @@ pub struct User {
 }
 
 pub fn load_user_config() -> UserConfig {
+    if !fs::exists(user_config_path()).expect("Failed to check for the user config") {
+        create_default_config();
+    }
+
     let config: UserConfig = toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
         .expect("User config is invalid");
 
@@ -33,26 +37,24 @@ pub fn user_config_path() -> PathBuf {
     let mut config_path = get_config_dir();
     config_path.push("user.toml");
 
-    if !config_path.exists() {
-        create_default_config();
-    }
-
     config_path
 }
 
 fn create_default_config() {
-    let mut config_path = get_config_dir();
-    fs::create_dir_all(&config_path).expect("Failed to create config directory");
-    config_path.push("user.toml");
-    if !config_path.exists() {
-        File::create(&config_path).expect("Failed to create the config file");
-        fs::write(
-            config_path,
-            toml::ser::to_string(&UserConfig::default())
-                .expect("Failed to create the default config"),
-        )
-        .expect("Failed to write the config file");
-    }
+    File::create(&user_config_path()).expect("Failed to create the config file");
+    fs::write(
+        user_config_path(),
+        toml::ser::to_string(&UserConfig::default()).expect("Failed to create the default config"),
+    )
+    .expect("Failed to write the config file");
+}
+
+pub fn write_config(config: &UserConfig) {
+    fs::write(
+        user_config_path(),
+        toml::ser::to_string(config).expect("Failed to serialize the user config"),
+    )
+    .expect("Failed to write the user config");
 }
 
 impl Default for UserConfig {
