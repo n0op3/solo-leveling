@@ -12,7 +12,8 @@ use ratatui::{
 use std::collections::HashMap;
 use std::io;
 
-use crate::config::{UserConfig, load_exercises, load_user_config};
+use crate::config::load_exercises;
+use crate::config::user::{UserConfig, load_user_config};
 use crate::exercise::Exercise;
 use crate::level::levelup_requirement;
 use crate::ui::popup_area;
