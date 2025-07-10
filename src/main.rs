@@ -3,7 +3,6 @@ use std::io;
 use crate::ui::app::App;
 
 pub mod config;
-pub mod exercise;
 pub mod level;
 mod ui;
 

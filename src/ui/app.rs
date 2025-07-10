@@ -12,9 +12,9 @@ use ratatui::{
 use std::collections::HashMap;
 use std::io;
 
-use crate::config::load_exercises;
+use crate::config::exercise::Exercise;
+use crate::config::exercise::load_exercises;
 use crate::config::user::{UserConfig, load_user_config};
-use crate::exercise::Exercise;
 use crate::level::levelup_requirement;
 use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
@@ -40,7 +40,6 @@ impl Default for App {
             total_xp: 0,
             page: Page::Dashboard,
         };
-        app.update_stats();
 
         let custom_username = app.user_config.user.name.clone();
         if let Some(custom_username) = custom_username {
@@ -115,19 +114,20 @@ impl App {
                         .label(format!(
                             "{}/{} XP",
                             self.total_xp,
-                            levelup_requirement(self.user_config.user.level as usize)
+                            levelup_requirement(self.user_config.user.level)
                         ))
                         .percent(self.total_xp as u16),
                     chunks[1],
                 );
 
-                for (i, (category, xp)) in self.user_config.categories.iter().enumerate() {
+                for (i, (category_name, category)) in self.user_config.categories.iter().enumerate()
+                {
                     frame.render_widget(
                         Gauge::default()
-                            .block(Block::bordered().title(category.to_uppercase()))
+                            .block(Block::bordered().title(category_name.to_uppercase()))
                             .gauge_style(Style::new().cyan())
-                            .label(format!("{xp}/100 XP"))
-                            .percent(*xp as u16),
+                            .label(format!("{}/100 XP", category.xp()))
+                            .percent(category.xp() as u16),
                         chunks[i + 2],
                     );
                 }
@@ -175,13 +175,13 @@ impl App {
             match popup.handle_key(key) {
                 PopupResult::Exit => self.popup = None,
                 PopupResult::AddXP { category, xp } => {
-                    self.user_config.categories.insert(
-                        category.clone(),
-                        *self.user_config.categories.get(&category).unwrap_or(&0) + xp as i32,
-                    );
-
+                    match self.user_config.categories.get_mut(&category) {
+                        Some(category) => {
+                            category.add_xp(xp);
+                        }
+                        None => {}
+                    }
                     self.popup = None;
-                    self.update_stats();
                 }
                 PopupResult::None => {}
             }
@@ -234,19 +234,12 @@ impl App {
             _ => {}
         }
     }
-
-    fn update_stats(&mut self) {
-        self.total_xp = 0;
-        for (_category, xp) in self.user_config.categories.iter() {
-            self.total_xp += xp;
-        }
-    }
 }
 
 enum PopupResult {
     None,
     Exit,
-    AddXP { category: String, xp: usize },
+    AddXP { category: String, xp: i32 },
 }
 
 impl ExercisePopup {
@@ -273,10 +266,10 @@ impl ExercisePopup {
                 }
             }
             KeyCode::Enter => {
-                if let Ok(amount) = self.input.parse::<usize>() {
+                if let Ok(amount) = self.input.parse::<i32>() {
                     return PopupResult::AddXP {
                         category: self.exercise.category.clone(),
-                        xp: self.exercise.xp(amount),
+                        xp: self.exercise.xp(amount) as i32,
                     };
                 }
             }

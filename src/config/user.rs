@@ -1,4 +1,4 @@
-use crate::config::get_config_dir;
+use crate::config::{exercise::Category, get_config_dir};
 use std::{
     collections::HashMap,
     fs::{self, File, read_to_string},
@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserConfig {
     pub user: User,
-    pub categories: HashMap<String, i32>,
+    pub categories: HashMap<String, Category>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
