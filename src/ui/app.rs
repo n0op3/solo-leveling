@@ -14,7 +14,7 @@ use std::io;
 
 use crate::config::exercise::load_exercises;
 use crate::config::exercise::{Category, Exercise};
-use crate::config::user::{UserConfig, load_user_config};
+use crate::config::user::{self, UserConfig, load_user_config};
 use crate::ui::popup_area;
 use crate::ui::widget::tabs::Page;
 
@@ -193,6 +193,7 @@ impl App {
                         .add_xp(xp);
 
                     self.user_config.user.level.add_xp(xp);
+                    user::write_config(&self.user_config);
 
                     self.popup = None;
                 }
