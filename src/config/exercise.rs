@@ -26,7 +26,7 @@ pub enum Difficulty {
     Extreme,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Category {
     level: i32,
     xp: i32,
@@ -41,8 +41,18 @@ impl Category {
         self.xp
     }
 
-    pub fn add_xp(&mut self, xp: i32) {
-        while xp >= levelup_requirement(self.level) - self.xp {}
+    pub fn add_xp(&mut self, mut xp: i32) {
+        while xp >= levelup_requirement(self.level) - self.xp {
+            xp -= levelup_requirement(self.level) - self.xp;
+            self.level_up();
+        }
+
+        self.xp += xp;
+    }
+
+    pub fn level_up(&mut self) {
+        self.level += 1;
+        self.xp = 0;
     }
 }
 

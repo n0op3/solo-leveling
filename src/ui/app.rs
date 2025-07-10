@@ -12,8 +12,8 @@ use ratatui::{
 use std::collections::HashMap;
 use std::io;
 
-use crate::config::exercise::Exercise;
 use crate::config::exercise::load_exercises;
+use crate::config::exercise::{Category, Exercise};
 use crate::config::user::{UserConfig, load_user_config};
 use crate::level::levelup_requirement;
 use crate::ui::popup_area;
@@ -126,8 +126,16 @@ impl App {
                         Gauge::default()
                             .block(Block::bordered().title(category_name.to_uppercase()))
                             .gauge_style(Style::new().cyan())
-                            .label(format!("{}/100 XP", category.xp()))
-                            .percent(category.xp() as u16),
+                            .label(format!(
+                                "{}/{} XP",
+                                category.xp(),
+                                levelup_requirement(category.level())
+                            ))
+                            .percent(
+                                (category.xp() as f32
+                                    / levelup_requirement(category.level()) as f32
+                                    * 100.0) as u16,
+                            ),
                         chunks[i + 2],
                     );
                 }
@@ -175,12 +183,18 @@ impl App {
             match popup.handle_key(key) {
                 PopupResult::Exit => self.popup = None,
                 PopupResult::AddXP { category, xp } => {
-                    match self.user_config.categories.get_mut(&category) {
-                        Some(category) => {
-                            category.add_xp(xp);
-                        }
-                        None => {}
+                    if !self.user_config.categories.contains_key(&category) {
+                        self.user_config
+                            .categories
+                            .insert(category.clone(), Category::default());
                     }
+
+                    self.user_config
+                        .categories
+                        .get_mut(&category)
+                        .unwrap()
+                        .add_xp(xp);
+
                     self.popup = None;
                 }
                 PopupResult::None => {}
@@ -256,7 +270,7 @@ impl ExercisePopup {
             | KeyCode::Char('7')
             | KeyCode::Char('8')
             | KeyCode::Char('9') => {
-                if self.input.len() <= 3 {
+                if self.input.len() < 3 {
                     self.input.push(key.code.as_char().unwrap());
                 }
             }
