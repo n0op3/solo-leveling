@@ -24,7 +24,6 @@ pub struct App {
     user_config: UserConfig,
     exercises: HashMap<String, Exercise>,
     popup: Option<ExercisePopup>,
-    total_xp: i32,
     page: Page,
 }
 
@@ -36,7 +35,6 @@ impl Default for App {
             user_config: load_user_config(),
             exercises: load_exercises(),
             popup: None,
-            total_xp: 0,
             page: Page::Dashboard,
         };
 
