@@ -20,6 +20,7 @@ use crate::data;
 use crate::data::user::{UserData, load_user_data};
 use crate::ui::popup_area;
 use crate::ui::widget::exercise_popup::{ExercisePopup, PopupResult};
+use crate::ui::widget::popup::Popup;
 use crate::ui::widget::tabs::Page;
 
 pub struct App {
@@ -28,7 +29,7 @@ pub struct App {
     user_config: UserConfig,
     user_data: UserData,
     exercises: HashMap<String, Exercise>,
-    popup: Option<ExercisePopup>,
+    popup: Option<Box<dyn Popup>>,
     page: Page,
 }
 
@@ -169,43 +170,23 @@ impl App {
 
         if let Some(popup) = &self.popup {
             let area = popup_area(area, 60, 40);
-            frame.render_widget(popup, area);
+            popup.render(area, frame.buffer_mut());
         }
     }
 
     fn handle_key(&mut self, key: event::KeyEvent) {
-        if let Some(popup) = &mut self.popup {
-            match popup.handle_key(key) {
-                PopupResult::Exit => self.popup = None,
-                PopupResult::AddXP { category, xp } => {
-                    if !self.user_data.categories.contains_key(&category) {
-                        self.user_data
-                            .categories
-                            .insert(category.clone(), Category::default());
-                    }
-
-                    self.user_data
-                        .categories
-                        .get_mut(&category)
-                        .unwrap()
-                        .level
-                        .add_xp(xp);
-
-                    self.user_data.level.add_xp(xp);
-                    data::user::write_data(&self.user_data);
-
-                    self.popup = None;
-                }
-                PopupResult::None => {}
+        if let Some(mut popup) = self.popup.take() {
+            if !popup.handle_key(self, key.code) {
+                self.popup = Some(popup);
             }
-            return;
         }
 
         match &mut self.page {
             Page::Exercises(i) => match key.code {
                 KeyCode::Enter => match self.exercises.iter().nth(*i as usize) {
                     Some((name, exercise)) => {
-                        self.popup = Some(ExercisePopup::new(name.to_uppercase(), exercise))
+                        self.popup =
+                            Some(Box::new(ExercisePopup::new(name.to_uppercase(), exercise)))
                     }
                     None => {}
                 },
@@ -240,5 +221,9 @@ impl App {
             }
             _ => {}
         }
+    }
+
+    pub fn close_popup(&mut self) {
+        self.popup = None;
     }
 }
