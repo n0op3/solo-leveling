@@ -67,12 +67,19 @@ impl App {
 
     fn draw(&self, frame: &mut Frame) {
         let title = Line::from(" The System ".bold());
-        let instructions = Line::from(vec![
-            " Quit ".into(),
-            "<q> ".blue().bold(),
-            " Next page ".into(),
-            "<Tab> ".blue().bold(),
-        ]);
+        let mut instructions = vec![" Next page ".into(), "<Tab> ".blue().bold()];
+
+        instructions.append(&mut match self.page {
+            Page::Exercises(_) => {
+                vec![" Select ".into(), "<Enter> ".blue().bold()]
+            }
+            Page::Dashboard => {
+                vec![" Quit ".into(), "<q> ".blue().bold()]
+            }
+            _ => Vec::new(),
+        });
+
+        let instructions = Line::from(instructions);
 
         let outline = Block::bordered()
             .title(title.centered())
