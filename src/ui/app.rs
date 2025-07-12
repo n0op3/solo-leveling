@@ -184,13 +184,12 @@ impl App {
 
         match &mut self.page {
             Page::Exercises(i) => match key.code {
-                KeyCode::Enter => match self.exercises.iter().nth(*i as usize) {
-                    Some((name, exercise)) => {
+                KeyCode::Enter => {
+                    if let Some((name, exercise)) = self.exercises.iter().nth(*i as usize) {
                         self.popup =
                             Some(Box::new(ExercisePopup::new(name.to_uppercase(), exercise)))
                     }
-                    None => {}
-                },
+                }
                 KeyCode::Down | KeyCode::Char('j') => {
                     if *i == self.exercises.len() as i32 {
                         *i = 0;

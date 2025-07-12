@@ -6,7 +6,7 @@ use std::{
 
 use crate::config::get_config_dir;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct UserConfig {
     pub name: Option<String>,
 }
@@ -35,10 +35,4 @@ pub fn write_config(config: &UserConfig) {
         toml::ser::to_string(config).expect("Failed to serialize the user config"),
     )
     .expect("Failed to write the user config");
-}
-
-impl Default for UserConfig {
-    fn default() -> Self {
-        Self { name: None }
-    }
 }

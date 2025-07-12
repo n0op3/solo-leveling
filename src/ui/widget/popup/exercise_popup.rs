@@ -104,6 +104,6 @@ impl Popup for ExercisePopup {
             _ => {}
         }
 
-        return false;
+        false
     }
 }

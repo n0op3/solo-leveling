@@ -9,7 +9,7 @@ use crate::category::Category;
 use crate::data::get_data_dir;
 use crate::level::Level;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct UserData {
     pub level: Level,
     pub categories: HashMap<String, Category>,
@@ -39,13 +39,4 @@ pub fn write_data(data: &UserData) {
         toml::ser::to_string(data).expect("Failed to serialize the user data"),
     )
     .expect("Failed to write the user data");
-}
-
-impl Default for UserData {
-    fn default() -> Self {
-        Self {
-            level: Level::default(),
-            categories: HashMap::new(),
-        }
-    }
 }
