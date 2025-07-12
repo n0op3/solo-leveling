@@ -5,10 +5,10 @@ use ratatui::{layout::Rect, widgets::Widget};
 use ratatui::{prelude::Layout, style::Stylize};
 
 use crate::config::exercise::Exercise;
-use crate::ui::app::App;
+use crate::ui::widget::popup::Popup;
 
 pub struct ExercisePopup {
-    pub title: String,
+    title: String,
     input: String,
     pub exercise: Exercise,
 }
@@ -23,47 +23,12 @@ impl ExercisePopup {
     }
 }
 
-impl ExercisePopup {
-    fn handle_key(self, app: &mut App, key: KeyCode) {
-        match &key {
-            KeyCode::Char('q') => app.close_popup(),
-            KeyCode::Char('0')
-            | KeyCode::Char('1')
-            | KeyCode::Char('2')
-            | KeyCode::Char('3')
-            | KeyCode::Char('4')
-            | KeyCode::Char('5')
-            | KeyCode::Char('6')
-            | KeyCode::Char('7')
-            | KeyCode::Char('8')
-            | KeyCode::Char('9') => {
-                if self.input.len() < 3 {
-                    self.input.push(key.as_char().unwrap());
-                }
-            }
-            KeyCode::Backspace => {
-                if !self.input.is_empty() {
-                    self.input.remove(self.input.len() - 1);
-                }
-            }
-            KeyCode::Enter => {
-                if let Ok(amount) = self.input.parse::<i32>() {
-                    app.add_xp(
-                        self.exercise.category.clone(),
-                        self.exercise.xp(amount) as i32,
-                    );
-                }
-            }
-            _ => {}
-        }
+impl Popup for ExercisePopup {
+    fn title(&self) -> &String {
+        &self.title
     }
-}
 
-impl Widget for &mut ExercisePopup {
-    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
-    where
-        Self: Sized,
-    {
+    fn render_content(&self, area: Rect, buf: &mut ratatui::prelude::Buffer) {
         let layout = Layout::new(
             Direction::Vertical,
             [
@@ -104,10 +69,41 @@ impl Widget for &mut ExercisePopup {
             .centered()
             .render(layout[2], buf);
     }
-}
 
-pub enum PopupResult {
-    None,
-    Exit,
-    AddXP { category: String, xp: i32 },
+    fn handle_key(&mut self, app: &mut crate::ui::app::App, key: KeyCode) -> bool {
+        match key {
+            KeyCode::Esc | KeyCode::Char('q') => return true,
+            KeyCode::Char('0')
+            | KeyCode::Char('1')
+            | KeyCode::Char('2')
+            | KeyCode::Char('3')
+            | KeyCode::Char('4')
+            | KeyCode::Char('5')
+            | KeyCode::Char('6')
+            | KeyCode::Char('7')
+            | KeyCode::Char('8')
+            | KeyCode::Char('9') => {
+                if self.input.len() < 3 {
+                    self.input.push(key.as_char().unwrap());
+                }
+            }
+            KeyCode::Backspace => {
+                if !self.input.is_empty() {
+                    self.input.remove(self.input.len() - 1);
+                }
+            }
+            KeyCode::Enter => {
+                if let Ok(amount) = self.input.parse::<i32>() {
+                    app.add_xp(
+                        self.exercise.category.clone(),
+                        self.exercise.xp(amount) as i32,
+                    );
+                    return true;
+                }
+            }
+            _ => {}
+        }
+
+        return false;
+    }
 }

@@ -19,8 +19,8 @@ use crate::config::user::{UserConfig, load_user_config};
 use crate::data;
 use crate::data::user::{UserData, load_user_data};
 use crate::ui::popup_area;
-use crate::ui::widget::exercise_popup::{ExercisePopup, PopupResult};
 use crate::ui::widget::popup::Popup;
+use crate::ui::widget::popup::exercise_popup::ExercisePopup;
 use crate::ui::widget::tabs::Page;
 
 pub struct App {
@@ -179,6 +179,7 @@ impl App {
             if !popup.handle_key(self, key.code) {
                 self.popup = Some(popup);
             }
+            return;
         }
 
         match &mut self.page {
@@ -223,7 +224,19 @@ impl App {
         }
     }
 
-    pub fn close_popup(&mut self) {
-        self.popup = None;
+    pub fn add_xp(&mut self, category: String, xp: i32) {
+        let category = match self.user_data.categories.get_mut(&category) {
+            None => {
+                self.user_data
+                    .categories
+                    .insert(category.clone(), Category::default());
+                self.user_data.categories.get_mut(&category).unwrap()
+            }
+            Some(category) => category,
+        };
+
+        category.level.add_xp(xp);
+        self.user_data.level.add_xp(xp);
+        data::user::write_data(&self.user_data);
     }
 }
