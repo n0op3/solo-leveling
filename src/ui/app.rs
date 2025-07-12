@@ -2,14 +2,13 @@ use crossterm::event;
 use crossterm::event::KeyCode;
 use ratatui::layout::{Constraint, Direction, Layout, Margin};
 use ratatui::style::{Modifier, Style};
-use ratatui::text::Line;
-use ratatui::widgets::Gauge;
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
     symbols::border,
     widgets::{Block, Paragraph},
 };
+use ratatui::{text::Line, widgets::Gauge};
 use std::collections::HashMap;
 use std::io;
 
@@ -74,14 +73,14 @@ impl App {
             "<Tab> ".blue().bold(),
         ]);
 
-        let block = Block::bordered()
+        let outline = Block::bordered()
             .title(title.centered())
             .title_bottom(instructions.centered())
-            .border_set(border::THICK);
+            .border_set(border::ROUNDED);
 
         let area = frame.area().inner(Margin::new(1, 2));
         frame.render_widget(
-            Paragraph::new(self.page.name()).bold().block(block),
+            Paragraph::new(self.page.name()).bold().block(outline),
             frame.area(),
         );
 
