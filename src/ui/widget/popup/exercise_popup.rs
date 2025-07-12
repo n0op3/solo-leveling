@@ -83,7 +83,7 @@ impl Popup for ExercisePopup {
             | KeyCode::Char('7')
             | KeyCode::Char('8')
             | KeyCode::Char('9') => {
-                if self.input.len() < 3 {
+                if !(key == KeyCode::Char('0') && self.input.is_empty()) && self.input.len() < 3 {
                     self.input.push(key.as_char().unwrap());
                 }
             }
