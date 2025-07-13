@@ -18,9 +18,10 @@ use crate::config::exercise::load_exercises;
 use crate::config::user::{UserConfig, load_user_config};
 use crate::data;
 use crate::data::user::{UserData, load_user_data};
-use crate::ui::popup_area;
 use crate::ui::widget::popup::Popup;
+use crate::ui::widget::popup::bonus_xp_popup::BonusXPPopup;
 use crate::ui::widget::popup::exercise_popup::ExercisePopup;
+use crate::ui::widget::popup::popup_area;
 use crate::ui::widget::tabs::Page;
 
 pub struct App {
@@ -67,14 +68,19 @@ impl App {
 
     fn draw(&self, frame: &mut Frame) {
         let title = Line::from(" The System ".bold());
-        let mut instructions = vec![" Next page ".into(), "<Tab> ".blue().bold()];
+        let mut instructions = vec![
+            " Next page ".into(),
+            "<Tab> ".blue().bold(),
+            " Quit ".into(),
+            "<q> ".blue().bold(),
+        ];
 
         instructions.append(&mut match self.page {
             Page::Exercises(_) => {
                 vec![" Select ".into(), "<Enter> ".blue().bold()]
             }
             Page::Dashboard => {
-                vec![" Quit ".into(), "<q> ".blue().bold()]
+                vec![" Add Bonus XP ".into(), "<b> ".blue().bold()]
             }
             _ => Vec::new(),
         });
@@ -213,12 +219,18 @@ impl App {
                 }
                 _ => {}
             },
+            Page::Dashboard => match key.code {
+                KeyCode::Esc => self.popup = None,
+                KeyCode::Char('b') => {
+                    self.popup = Some(Box::new(BonusXPPopup::default()));
+                }
+                _ => {}
+            },
             _ => {}
         }
 
         match key.code {
             KeyCode::Char('q') => self.exit = true,
-            KeyCode::Esc => self.popup = None,
             KeyCode::Tab => {
                 self.page = match self.page {
                     Page::Dashboard => Page::Workouts,
