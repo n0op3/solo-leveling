@@ -211,29 +211,15 @@ impl App {
                         .get_mut(match &self.exercises.get(exercise_name) {
                             Some(exercise) => &exercise.category,
                             None => {
-                                println!("exercise {exercise_name} not found");
                                 self.user_data.level.add_xp(-xp);
                                 continue;
                             }
                         })
                 {
-                    println!(
-                        "removing {xp} xp from {}",
-                        self.exercises.get(exercise_name).unwrap().category
-                    );
-                    category.level.add_xp(-xp);
-                } else {
-                    println!(
-                        "{} not found",
-                        self.exercises.get(exercise_name).unwrap().category
-                    );
+                    category.level.add_xp(-xp / 2);
                 }
             }
         } else {
-            println!(
-                "Removing {} XP from the user's account",
-                -100 * days_passed as i32
-            );
             self.user_data.level.add_xp(-100 * days_passed as i32);
         }
     }
