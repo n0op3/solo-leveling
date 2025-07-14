@@ -1,6 +1,6 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::style::{Color, Modifier, Style, Stylize};
+use ratatui::style::{Modifier, Style, Stylize};
 use ratatui::text::Line;
 use ratatui::widgets::{Block, Gauge, Paragraph, Widget};
 
@@ -76,6 +76,11 @@ impl Page {
             Page::DailyQuest => {
                 if let Some(daily_quest) = &app.user_config.daily_quest {
                     let mut constraints = Vec::new();
+                    let completed = daily_quest.is_completed(&app.user_data.daily_quest_progress);
+
+                    if completed {
+                        constraints.push(Constraint::Max(2));
+                    }
 
                     for _ in 0..daily_quest.exercises.len() {
                         constraints.push(Constraint::Max(5));
@@ -85,6 +90,15 @@ impl Page {
                         .direction(Direction::Vertical)
                         .constraints(constraints)
                         .split(area);
+
+                    let mut offset = 0;
+                    if completed {
+                        frame.render_widget(
+                            Paragraph::new("COMPLETED").centered().green(),
+                            chunks[0],
+                        );
+                        offset = 1;
+                    }
 
                     for (i, (exercise_name, to_do)) in daily_quest.exercises.iter().enumerate() {
                         let done = *app
@@ -105,7 +119,7 @@ impl Page {
                                 })
                                 .label(format!("{done} / {to_do}"))
                                 .percent((percentage * 100.0) as u16),
-                            chunks[i],
+                            chunks[i + offset],
                         );
                     }
                 } else {

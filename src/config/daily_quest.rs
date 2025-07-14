@@ -28,7 +28,7 @@ impl DailyQuest {
             .sum()
     }
 
-    pub fn is_completed(&self, exercises_done: HashMap<String, i32>) -> bool {
+    pub fn is_completed(&self, exercises_done: &HashMap<String, i32>) -> bool {
         for exercise in self.exercises.iter() {
             match exercises_done.get(exercise.0) {
                 Some(amount) => {
