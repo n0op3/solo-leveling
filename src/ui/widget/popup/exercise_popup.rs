@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 
 use crossterm::event::KeyCode;
 use ratatui::{layout::Constraint, prelude::Margin};
@@ -6,7 +5,6 @@ use ratatui::{layout::Direction, widgets::Paragraph};
 use ratatui::{layout::Rect, widgets::Widget};
 use ratatui::{prelude::Layout, style::Stylize};
 
-use crate::config::daily_quest;
 use crate::config::exercise::Exercise;
 use crate::ui::widget::popup::Popup;
 
