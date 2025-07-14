@@ -125,7 +125,7 @@ impl Page {
                         );
                     }
                 } else {
-                    Paragraph::new("No daily quest was set. You will lose 100 XP per day.")
+                    Paragraph::new("No daily quest was set. You will lose 50 XP per day.")
                         .red()
                         .centered()
                         .render(area, frame.buffer_mut());

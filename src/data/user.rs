@@ -16,6 +16,7 @@ pub struct UserData {
     pub level: Level,
     pub categories: HashMap<String, Category>,
     pub last_login: Datetime,
+    pub last_daily: Option<Datetime>,
     pub daily_quest_progress: HashMap<String, i32>,
 }
 
@@ -55,6 +56,7 @@ impl Default for UserData {
             level: Level::default(),
             categories: HashMap::default(),
             last_login: today(),
+            last_daily: None,
             daily_quest_progress: HashMap::default(),
         }
     }

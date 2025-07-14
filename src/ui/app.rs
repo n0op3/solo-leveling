@@ -208,6 +208,20 @@ impl App {
 
         category.level.add_xp(xp);
         self.user_data.level.add_xp(xp);
+
+        if let Some(daily) = &self.user_config.daily_quest {
+            if daily.is_completed(&self.user_data.daily_quest_progress)
+                && self
+                    .user_data
+                    .last_daily
+                    .map(|last_daily| last_daily != today())
+                    .unwrap_or(true)
+            {
+                self.user_data.last_daily = Some(today());
+                self.add_general_xp(daily.xp_bonus(&self.exercises));
+            }
+        }
+
         data::user::write_data(&self.user_data);
     }
 
@@ -251,7 +265,7 @@ impl App {
                 }
             }
         } else {
-            self.user_data.level.add_xp(-100 * days_passed as i32);
+            self.user_data.level.add_xp(-50 * days_passed as i32);
         }
     }
 }
