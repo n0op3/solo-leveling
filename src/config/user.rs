@@ -5,10 +5,16 @@ use std::{
     path::PathBuf,
 };
 
-use crate::config::get_config_dir;
+use crate::config::{daily_quest::DailyQuest, get_config_dir};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct UserConfig {
+    pub name: Option<String>,
+    pub daily_quest: Option<DailyQuest>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+struct IntermediateUserConfig {
     pub name: Option<String>,
     pub daily_quest: Option<HashMap<String, i32>>,
 }
@@ -18,10 +24,11 @@ pub fn load_user_config() -> UserConfig {
         return UserConfig::default();
     }
 
-    let config: UserConfig = toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
-        .expect("User config is invalid");
+    let config: IntermediateUserConfig =
+        toml::from_str(read_to_string(user_config_path()).unwrap().as_str())
+            .expect("User config is invalid");
 
-    config
+    UserConfig::from(config)
 }
 
 pub fn user_config_path() -> PathBuf {
@@ -37,4 +44,17 @@ pub fn write_config(config: &UserConfig) {
         toml::ser::to_string(config).expect("Failed to serialize the user config"),
     )
     .expect("Failed to write the user config");
+}
+
+impl From<IntermediateUserConfig> for UserConfig {
+    fn from(value: IntermediateUserConfig) -> Self {
+        Self {
+            name: value.name,
+            daily_quest: if let Some(exercises) = value.daily_quest {
+                Some(DailyQuest::new(exercises))
+            } else {
+                None
+            },
+        }
+    }
 }
