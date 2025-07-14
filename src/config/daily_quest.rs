@@ -6,7 +6,7 @@ use crate::config::exercise::Exercise;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DailyQuest {
-    exercises: HashMap<String, (i32, i32)>,
+    pub exercises: HashMap<String, (i32, i32)>,
 }
 
 impl DailyQuest {

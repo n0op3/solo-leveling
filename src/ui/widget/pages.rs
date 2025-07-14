@@ -1,8 +1,8 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::style::{Modifier, Style, Stylize};
+use ratatui::style::{Color, Modifier, Style, Stylize};
 use ratatui::text::Line;
-use ratatui::widgets::{Block, Gauge, Paragraph};
+use ratatui::widgets::{Block, Gauge, Paragraph, Widget};
 
 use crate::ui::app::App;
 
@@ -74,7 +74,42 @@ impl Page {
                 }
             }
             Page::DailyQuest => {
-                //TODO: Render the page
+                if let Some(daily_quest) = &app.user_config.daily_quest {
+                    let mut constraints = Vec::new();
+
+                    for _ in 0..daily_quest.exercises.len() {
+                        constraints.push(Constraint::Max(5));
+                    }
+
+                    let chunks = Layout::default()
+                        .direction(Direction::Vertical)
+                        .constraints(constraints)
+                        .split(area);
+
+                    for (i, (exercise_name, (to_do, done))) in
+                        daily_quest.exercises.iter().enumerate()
+                    {
+                        let percentage = *done as f32 / *to_do as f32;
+                        frame.render_widget(
+                            Gauge::default()
+                                .block(Block::bordered().title(exercise_name.to_uppercase()))
+                                .gauge_style(Style::new().fg(match percentage {
+                                    0.0..=0.2 => Color::Red,
+                                    0.2..0.5 => Color::Yellow,
+                                    0.5..1.0 => Color::LightYellow,
+                                    _ => Color::Green,
+                                }))
+                                .label(format!("{done} / {to_do}"))
+                                .percent((percentage * 100.0) as u16),
+                            chunks[i],
+                        );
+                    }
+                } else {
+                    Paragraph::new("No daily quest was set. You will lose 50 XP per day.")
+                        .red()
+                        .centered()
+                        .render(area, frame.buffer_mut());
+                }
             }
             Page::Exercises(index) => {
                 let mut lines = Vec::new();
