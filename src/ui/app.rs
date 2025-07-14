@@ -152,8 +152,8 @@ impl App {
             KeyCode::Char('q') => self.exit = true,
             KeyCode::Tab => {
                 self.page = match self.page {
-                    Page::Overview => Page::Workouts,
-                    Page::Workouts => Page::Exercises(0),
+                    Page::Overview => Page::DailyQuest,
+                    Page::DailyQuest => Page::Exercises(0),
                     Page::Exercises(_) => Page::Overview,
                 }
             }

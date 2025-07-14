@@ -9,7 +9,7 @@ use crate::ui::app::App;
 #[derive(Debug, Clone)]
 pub enum Page {
     Overview,
-    Workouts,
+    DailyQuest,
     Exercises(i32),
 }
 
@@ -17,7 +17,7 @@ impl Page {
     pub fn name(&self) -> String {
         match self {
             Page::Overview => String::from("Overview"),
-            Page::Workouts => String::from("Workouts"),
+            Self::DailyQuest => String::from("Daily Quest"),
             Page::Exercises(_) => String::from("Exercises"),
         }
     }
