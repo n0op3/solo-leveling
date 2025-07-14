@@ -86,10 +86,13 @@ impl Page {
                         .constraints(constraints)
                         .split(area);
 
-                    for (i, (exercise_name, (to_do, done))) in
-                        daily_quest.exercises.iter().enumerate()
-                    {
-                        let percentage = *done as f32 / *to_do as f32;
+                    for (i, (exercise_name, to_do)) in daily_quest.exercises.iter().enumerate() {
+                        let done = match &app.user_data.daily_quest_progress {
+                            Some(progress) => *progress.get(exercise_name).unwrap_or(&0),
+                            None => 0,
+                        };
+
+                        let percentage = done as f32 / *to_do as f32;
                         frame.render_widget(
                             Gauge::default()
                                 .block(Block::bordered().title(exercise_name.to_uppercase()))
