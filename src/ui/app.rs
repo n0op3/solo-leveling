@@ -196,7 +196,7 @@ impl App {
             .signed_duration_since(last_login)
             .num_days()
             - 1)
-        .max(0);
+        .clamp(0, 7);
 
         if let Some(daily_quest) = &self.user_config.daily_quest {
             for (exercise_name, amount) in daily_quest.exercises.iter() {
