@@ -73,6 +73,9 @@ impl Page {
                     );
                 }
             }
+            Page::DailyQuest => {
+                //TODO: Render the page
+            }
             Page::Exercises(index) => {
                 let mut lines = Vec::new();
 
@@ -102,7 +105,6 @@ impl Page {
 
                 frame.render_widget(paragraph, area);
             }
-            _ => {}
         }
     }
 }

@@ -1,6 +1,7 @@
 use dirs_next::config_dir;
 use std::{fs, path::PathBuf};
 
+pub mod daily_quest;
 pub mod exercise;
 pub mod user;
 
