@@ -1,14 +1,13 @@
 use crossterm::event;
 use crossterm::event::KeyCode;
-use ratatui::layout::{Constraint, Direction, Layout, Margin};
-use ratatui::style::{Modifier, Style};
+use ratatui::layout::Margin;
+use ratatui::text::Line;
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
     symbols::border,
     widgets::{Block, Paragraph},
 };
-use ratatui::{text::Line, widgets::Gauge};
 use std::collections::HashMap;
 use std::io;
 
@@ -26,10 +25,10 @@ use crate::ui::widget::popup::popup_area;
 
 pub struct App {
     exit: bool,
-    username: String,
-    user_config: UserConfig,
-    user_data: UserData,
-    exercises: HashMap<String, Exercise>,
+    pub username: String,
+    pub user_config: UserConfig,
+    pub user_data: UserData,
+    pub exercises: HashMap<String, Exercise>,
     popup: Option<Box<dyn Popup>>,
     page: Page,
 }
@@ -99,87 +98,7 @@ impl App {
         );
 
         let area = area.inner(Margin::new(4, 0));
-        match self.page {
-            Page::Overview => {
-                let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
-
-                for _category in self.user_data.categories.iter() {
-                    constraints.push(Constraint::Max(3));
-                }
-
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .constraints(constraints)
-                    .split(area);
-
-                frame.render_widget(
-                    Paragraph::new(format!("Welcome, {}", self.username))
-                        .style(Style::default().white())
-                        .centered(),
-                    chunks[0],
-                );
-                frame.render_widget(
-                    Gauge::default()
-                        .block(
-                            Block::bordered()
-                                .title(format!("LEVEL {}", self.user_data.level.level())),
-                        )
-                        .gauge_style(Style::new().red())
-                        .label(self.user_data.level.xp_text())
-                        .percent((self.user_data.level.percentage() * 100.0) as u16),
-                    chunks[1],
-                );
-
-                for (i, (category_name, category)) in self.user_data.categories.iter().enumerate() {
-                    frame.render_widget(
-                        Gauge::default()
-                            .block(Block::bordered().title(format!(
-                                "{} LVL {}",
-                                category_name.to_uppercase(),
-                                category.level.level()
-                            )))
-                            .gauge_style(Style::new().cyan())
-                            .label(format!(
-                                "{}/{} XP",
-                                category.level.xp(),
-                                category.level.levelup_requirement()
-                            ))
-                            .percent((category.level.percentage() * 100.0) as u16),
-                        chunks[i + 2],
-                    );
-                }
-            }
-            Page::Exercises(index) => {
-                let mut lines = Vec::new();
-
-                for (i, (exercise_name, exercise)) in self.exercises.iter().enumerate() {
-                    let style = Style::new().fg(exercise.color());
-
-                    let line = Line::styled(
-                        format!(
-                            "{} {}: {}",
-                            if index == i as i32 { ">>" } else { "  " },
-                            exercise_name.to_uppercase(),
-                            exercise.xp_text()
-                        ),
-                        if index == i as i32 {
-                            style.add_modifier(Modifier::BOLD)
-                        } else {
-                            style
-                        },
-                    );
-
-                    lines.push(line);
-                }
-
-                let paragraph = Paragraph::new(lines)
-                    .block(Block::new())
-                    .scroll(((index - area.height as i32 / 2).max(0) as u16, 0));
-
-                frame.render_widget(paragraph, area);
-            }
-            _ => {}
-        }
+        self.page.render(self, frame, area);
 
         if let Some(popup) = &self.popup {
             let area = popup_area(area, 60, 40);
