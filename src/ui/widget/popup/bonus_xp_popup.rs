@@ -111,7 +111,7 @@ impl Popup for BonusXPPopup {
             KeyCode::Enter => {
                 if self.is_input_valid() {
                     app.add_xp(
-                        self.category_input.to_lowercase(),
+                        &self.category_input.to_lowercase(),
                         self.xp_input.parse().unwrap(),
                     );
                     return true;

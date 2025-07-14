@@ -24,6 +24,7 @@ use crate::ui::widget::popup::Popup;
 use crate::ui::widget::popup::bonus_xp_popup::BonusXPPopup;
 use crate::ui::widget::popup::exercise_popup::ExercisePopup;
 use crate::ui::widget::popup::popup_area;
+use crate::ui::widget::popup::workout_popup::WorkoutPopup;
 use crate::util::today;
 
 pub struct App {
@@ -125,6 +126,28 @@ impl App {
         }
 
         match &mut self.page {
+            Page::Workouts(i) => match key.code {
+                KeyCode::Enter => {
+                    if let Some(workout) = self.workouts.iter().nth(*i as usize) {
+                        self.popup = Some(Box::new(WorkoutPopup::new(workout)));
+                    }
+                }
+                KeyCode::Down | KeyCode::Char('j') => {
+                    if *i == self.exercises.len() as i32 {
+                        *i = 0;
+                    } else {
+                        *i += 1;
+                    }
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    if *i == -1 {
+                        *i = self.exercises.len() as i32 - 1;
+                    } else {
+                        *i -= 1;
+                    }
+                }
+                _ => {}
+            },
             Page::Exercises(i) => match key.code {
                 KeyCode::Enter => {
                     if let Some((name, exercise)) = self.exercises.iter().nth(*i as usize) {
@@ -163,7 +186,8 @@ impl App {
             KeyCode::Tab => {
                 self.page = match self.page {
                     Page::Overview => Page::DailyQuest,
-                    Page::DailyQuest => Page::Exercises(0),
+                    Page::DailyQuest => Page::Workouts(0),
+                    Page::Workouts(_) => Page::Exercises(0),
                     Page::Exercises(_) => Page::Overview,
                 }
             }
@@ -171,13 +195,13 @@ impl App {
         }
     }
 
-    pub fn add_xp(&mut self, category: String, xp: i32) {
-        let category = match self.user_data.categories.get_mut(&category) {
+    pub fn add_xp(&mut self, category: &String, xp: i32) {
+        let category = match self.user_data.categories.get_mut(category) {
             None => {
                 self.user_data
                     .categories
                     .insert(category.clone(), Category::default());
-                self.user_data.categories.get_mut(&category).unwrap()
+                self.user_data.categories.get_mut(category).unwrap()
             }
             Some(category) => category,
         };
@@ -185,6 +209,10 @@ impl App {
         category.level.add_xp(xp);
         self.user_data.level.add_xp(xp);
         data::user::write_data(&self.user_data);
+    }
+
+    pub fn add_general_xp(&mut self, xp: i32) {
+        self.user_data.level.add_xp(xp);
     }
 
     fn apply_penalty_for_daily_quests(&mut self) {

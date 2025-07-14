@@ -10,6 +10,7 @@ use crate::ui::app::App;
 pub enum Page {
     Overview,
     DailyQuest,
+    Workouts(i32),
     Exercises(i32),
 }
 
@@ -18,6 +19,7 @@ impl Page {
         match self {
             Page::Overview => String::from("Overview"),
             Self::DailyQuest => String::from("Daily Quest"),
+            Self::Workouts(_) => String::from("Workouts"),
             Page::Exercises(_) => String::from("Exercises"),
         }
     }
@@ -128,6 +130,35 @@ impl Page {
                         .centered()
                         .render(area, frame.buffer_mut());
                 }
+            }
+            Page::Workouts(index) => {
+                let mut lines = Vec::new();
+
+                for (i, workout) in app.workouts.iter().enumerate() {
+                    let style = Style::new().fg(workout.color());
+
+                    let line = Line::styled(
+                        format!(
+                            "{} {}: {} bonus XP",
+                            if *index == i as i32 { ">>" } else { "  " },
+                            workout.name,
+                            workout.xp_bonus(&app.exercises)
+                        ),
+                        if *index == i as i32 {
+                            style.add_modifier(Modifier::BOLD)
+                        } else {
+                            style
+                        },
+                    );
+
+                    lines.push(line);
+                }
+
+                let paragraph = Paragraph::new(lines)
+                    .block(Block::new())
+                    .scroll(((index - area.height as i32 / 2).max(0) as u16, 0));
+
+                frame.render_widget(paragraph, area);
             }
             Page::Exercises(index) => {
                 let mut lines = Vec::new();

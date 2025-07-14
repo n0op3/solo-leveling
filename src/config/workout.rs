@@ -4,11 +4,12 @@ use std::{
     path::PathBuf,
 };
 
+use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 
 use crate::config::{exercise::Exercise, get_config_dir};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Workout {
     pub name: String,
     pub exercises: HashMap<String, i32>,
@@ -24,7 +25,17 @@ impl Workout {
                     None => 0,
                 },
             )
-            .sum()
+            .sum::<i32>()
+            / 2
+    }
+
+    pub fn color(&self) -> Color {
+        match self.exercises.len() {
+            0..3 => Color::Green,
+            3..5 => Color::Yellow,
+            5..=10 => Color::Red,
+            _ => Color::Magenta,
+        }
     }
 }
 

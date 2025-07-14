@@ -104,7 +104,7 @@ impl Popup for ExercisePopup {
                         .daily_quest_progress
                         .insert(self.title.to_lowercase(), done);
 
-                    app.add_xp(self.exercise.category.clone(), self.exercise.xp(amount));
+                    app.add_xp(&self.exercise.category, self.exercise.xp(amount));
                     return true;
                 }
             }

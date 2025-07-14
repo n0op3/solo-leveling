@@ -1,5 +1,6 @@
 pub mod bonus_xp_popup;
 pub mod exercise_popup;
+pub mod workout_popup;
 
 use crossterm::event::KeyCode;
 use ratatui::{
