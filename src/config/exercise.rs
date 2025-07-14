@@ -12,7 +12,7 @@ pub enum ExerciseType {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Exercise {
-    pub xp: usize,
+    pub xp: i32,
     pub category: String,
     pub time: Option<i32>,
 }
@@ -50,12 +50,11 @@ pub fn load_exercises() -> HashMap<String, Exercise> {
 }
 
 impl Exercise {
-    pub fn xp(&self, reps_or_seconds: i32) -> usize {
+    pub fn xp(&self, reps_or_seconds: i32) -> i32 {
         (match self.time {
             Some(time) => reps_or_seconds / time,
             None => reps_or_seconds,
-        }) as usize
-            * self.xp
+        }) * self.xp
     }
 
     pub fn xp_text(&self) -> String {
@@ -69,9 +68,9 @@ impl Exercise {
         )
     }
 
-    pub fn absolute_xp(&self) -> usize {
+    pub fn absolute_xp(&self) -> i32 {
         match self.time {
-            Some(time) => self.xp / time as usize,
+            Some(time) => self.xp / time,
             None => self.xp,
         }
     }

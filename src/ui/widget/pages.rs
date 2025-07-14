@@ -93,7 +93,7 @@ impl Page {
                             .get(&exercise_name.to_lowercase())
                             .unwrap_or(&0);
 
-                        let percentage = done as f32 / *to_do as f32;
+                        let percentage = (done as f32 / *to_do as f32).clamp(0.0, 1.0);
                         frame.render_widget(
                             Gauge::default()
                                 .block(Block::bordered().title(exercise_name.to_uppercase()))

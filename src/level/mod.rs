@@ -12,12 +12,26 @@ pub struct Level {
 
 impl Level {
     pub fn add_xp(&mut self, mut xp: i32) {
+        if xp < 0 {
+            while -xp > self.xp {
+                xp += self.xp;
+                self.level -= 1;
+                self.xp = self.levelup_requirement() - 1;
+            }
+
+            self.xp += xp;
+            return;
+        }
+
         while xp >= self.levelup_requirement() - self.xp() {
             xp -= self.levelup_requirement() - self.xp();
             self.level_up();
         }
 
         self.xp += xp;
+
+        self.level = self.level.max(0);
+        self.xp = self.xp.max(0);
     }
 
     pub fn level_up(&mut self) {

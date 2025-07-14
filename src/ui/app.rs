@@ -1,3 +1,4 @@
+use chrono::{Local, NaiveDate};
 use crossterm::event;
 use crossterm::event::KeyCode;
 use ratatui::layout::Margin;
@@ -57,6 +58,7 @@ impl Default for App {
 
 impl App {
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+        self.apply_penalty_for_daily_quests();
         self.user_data.last_login = today();
 
         while !self.exit {
@@ -180,5 +182,59 @@ impl App {
         category.level.add_xp(xp);
         self.user_data.level.add_xp(xp);
         data::user::write_data(&self.user_data);
+    }
+
+    fn apply_penalty_for_daily_quests(&mut self) {
+        let last_login = NaiveDate::parse_from_str(
+            self.user_data.last_login.date.unwrap().to_string().as_str(),
+            "%Y-%m-%d",
+        )
+        .expect("Unable to parse the last login date");
+
+        let days_passed = (Local::now()
+            .date_naive()
+            .signed_duration_since(last_login)
+            .num_days()
+            - 1)
+        .max(0);
+
+        if let Some(daily_quest) = &self.user_config.daily_quest {
+            for (exercise_name, amount) in daily_quest.exercises.iter() {
+                let xp = match self.exercises.get(exercise_name) {
+                    Some(exercise) => exercise.xp(*amount),
+                    None => 0,
+                } * days_passed as i32;
+
+                if let Some(category) =
+                    self.user_data
+                        .categories
+                        .get_mut(match &self.exercises.get(exercise_name) {
+                            Some(exercise) => &exercise.category,
+                            None => {
+                                println!("exercise {exercise_name} not found");
+                                self.user_data.level.add_xp(-xp);
+                                continue;
+                            }
+                        })
+                {
+                    println!(
+                        "removing {xp} xp from {}",
+                        self.exercises.get(exercise_name).unwrap().category
+                    );
+                    category.level.add_xp(-xp);
+                } else {
+                    println!(
+                        "{} not found",
+                        self.exercises.get(exercise_name).unwrap().category
+                    );
+                }
+            }
+        } else {
+            println!(
+                "Removing {} XP from the user's account",
+                -100 * days_passed as i32
+            );
+            self.user_data.level.add_xp(-100 * days_passed as i32);
+        }
     }
 }
