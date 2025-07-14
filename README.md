@@ -10,9 +10,7 @@ this app is supposed to help you with.
 The configuration directories are as follows:
 
 |Linux  |`$XDG_CONFIG_HOME`/solo-leveling or `$HOME`/.config/solo-leveling |
-|-------|------------------------------------------------------------------|
 |macOS  |`$HOME`/Library/Application Support/solo-leveling                 |
-|-------|------------------------------------------------------------------|
 |Windows|`{FOLDERID_RoamingAppData}/solo-leveling              `           |
 
 The System parses the following .toml files situated in this directory:
