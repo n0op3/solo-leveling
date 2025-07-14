@@ -16,7 +16,7 @@ pub struct UserData {
     pub level: Level,
     pub categories: HashMap<String, Category>,
     pub last_login: Datetime,
-    pub daily_quest_progress: Option<HashMap<String, i32>>,
+    pub daily_quest_progress: HashMap<String, i32>,
 }
 
 pub fn load_user_data() -> UserData {
@@ -28,7 +28,7 @@ pub fn load_user_data() -> UserData {
         .expect("User data is invalid");
 
     if data.last_login != today() {
-        data.daily_quest_progress = None
+        data.daily_quest_progress.clear();
     }
 
     data
@@ -55,7 +55,7 @@ impl Default for UserData {
             level: Level::default(),
             categories: HashMap::default(),
             last_login: today(),
-            daily_quest_progress: None,
+            daily_quest_progress: HashMap::default(),
         }
     }
 }

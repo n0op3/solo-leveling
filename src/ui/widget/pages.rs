@@ -87,10 +87,11 @@ impl Page {
                         .split(area);
 
                     for (i, (exercise_name, to_do)) in daily_quest.exercises.iter().enumerate() {
-                        let done = match &app.user_data.daily_quest_progress {
-                            Some(progress) => *progress.get(exercise_name).unwrap_or(&0),
-                            None => 0,
-                        };
+                        let done = *app
+                            .user_data
+                            .daily_quest_progress
+                            .get(&exercise_name.to_lowercase())
+                            .unwrap_or(&0);
 
                         let percentage = done as f32 / *to_do as f32;
                         frame.render_widget(

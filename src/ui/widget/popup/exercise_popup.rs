@@ -1,4 +1,3 @@
-
 use crossterm::event::KeyCode;
 use ratatui::{layout::Constraint, prelude::Margin};
 use ratatui::{layout::Direction, widgets::Paragraph};
@@ -95,10 +94,15 @@ impl Popup for ExercisePopup {
             }
             KeyCode::Enter => {
                 if let Ok(amount) = self.input.parse::<i32>() {
-                    if let Some(progress) = &mut app.user_data.daily_quest_progress {
-                        let done = *progress.get(&self.title.to_lowercase()).unwrap_or(&0) + amount;
-                        progress.insert(self.title.to_lowercase(), done);
-                    }
+                    let done = *app
+                        .user_data
+                        .daily_quest_progress
+                        .get(&self.title.to_lowercase())
+                        .unwrap_or(&0)
+                        + amount;
+                    app.user_data
+                        .daily_quest_progress
+                        .insert(self.title.to_lowercase(), done);
 
                     app.add_xp(
                         self.exercise.category.clone(),
