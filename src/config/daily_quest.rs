@@ -17,14 +17,12 @@ impl DailyQuest {
     pub fn xp_bonus(&self, exercise_map: &HashMap<String, Exercise>) -> i32 {
         self.exercises
             .iter()
-            .map(|(exercise_name, amount)| {
-                let xp = match exercise_map.get(exercise_name) {
+            .map(
+                |(exercise_name, amount)| match exercise_map.get(exercise_name) {
                     Some(exercise) => exercise.xp(*amount),
                     None => 0,
-                };
-
-                xp as i32
-            })
+                },
+            )
             .sum()
     }
 

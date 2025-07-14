@@ -47,14 +47,10 @@ pub fn write_config(config: &UserConfig) {
 }
 
 impl From<IntermediateUserConfig> for UserConfig {
-    fn from(value: IntermediateUserConfig) -> Self {
+    fn from(config: IntermediateUserConfig) -> Self {
         Self {
-            name: value.name,
-            daily_quest: if let Some(exercises) = value.daily_quest {
-                Some(DailyQuest::new(exercises))
-            } else {
-                None
-            },
+            name: config.name,
+            daily_quest: config.daily_quest.map(DailyQuest::new),
         }
     }
 }
