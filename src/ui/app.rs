@@ -1,4 +1,3 @@
-use chrono::{DateTime, Datelike, Utc};
 use crossterm::event;
 use crossterm::event::KeyCode;
 use ratatui::layout::Margin;
@@ -11,7 +10,6 @@ use ratatui::{
 };
 use std::collections::HashMap;
 use std::io;
-use toml::value::{Date, Datetime};
 
 use crate::category::Category;
 use crate::config::exercise::Exercise;
