@@ -4,15 +4,18 @@ use std::{
     fs::{self, read_to_string},
     path::PathBuf,
 };
+use toml::value::Datetime;
 
 use crate::category::Category;
 use crate::data::get_data_dir;
 use crate::level::Level;
+use crate::util::today;
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UserData {
     pub level: Level,
     pub categories: HashMap<String, Category>,
+    pub last_login: Datetime,
 }
 
 pub fn load_user_data() -> UserData {
@@ -39,4 +42,14 @@ pub fn write_data(data: &UserData) {
         toml::ser::to_string(data).expect("Failed to serialize the user data"),
     )
     .expect("Failed to write the user data");
+}
+
+impl Default for UserData {
+    fn default() -> Self {
+        Self {
+            level: Level::default(),
+            categories: HashMap::default(),
+            last_login: today(),
+        }
+    }
 }

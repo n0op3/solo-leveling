@@ -1,3 +1,4 @@
+use chrono::{DateTime, Datelike, Utc};
 use crossterm::event;
 use crossterm::event::KeyCode;
 use ratatui::layout::Margin;
@@ -10,6 +11,7 @@ use ratatui::{
 };
 use std::collections::HashMap;
 use std::io;
+use toml::value::{Date, Datetime};
 
 use crate::category::Category;
 use crate::config::exercise::Exercise;
@@ -22,6 +24,7 @@ use crate::ui::widget::popup::Popup;
 use crate::ui::widget::popup::bonus_xp_popup::BonusXPPopup;
 use crate::ui::widget::popup::exercise_popup::ExercisePopup;
 use crate::ui::widget::popup::popup_area;
+use crate::util::today;
 
 pub struct App {
     exit: bool,
@@ -56,12 +59,16 @@ impl Default for App {
 
 impl App {
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+        self.user_data.last_login = today();
+
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             if let Some(key) = event::read()?.as_key_press_event() {
                 self.handle_key(key);
             }
         }
+
+        data::user::write_data(&self.user_data);
         Ok(())
     }
 
