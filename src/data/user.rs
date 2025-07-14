@@ -16,6 +16,7 @@ pub struct UserData {
     pub level: Level,
     pub categories: HashMap<String, Category>,
     pub last_login: Datetime,
+    pub daily_quest_progress: Option<HashMap<String, i32>>,
 }
 
 pub fn load_user_data() -> UserData {
@@ -23,8 +24,12 @@ pub fn load_user_data() -> UserData {
         return UserData::default();
     }
 
-    let data: UserData = toml::from_str(read_to_string(user_data_path()).unwrap().as_str())
+    let mut data: UserData = toml::from_str(read_to_string(user_data_path()).unwrap().as_str())
         .expect("User data is invalid");
+
+    if data.last_login != today() {
+        data.daily_quest_progress = None
+    }
 
     data
 }
@@ -50,6 +55,7 @@ impl Default for UserData {
             level: Level::default(),
             categories: HashMap::default(),
             last_login: today(),
+            daily_quest_progress: None,
         }
     }
 }
