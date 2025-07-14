@@ -25,6 +25,8 @@ push-up = 100
 squat = 40
 run-m = 1500
 ```
+If you fail to do the daily quest, you will lose the amount of XP equivalent to
+all the exercises' XP divided by 2.
 
 ### Any .toml files in the config dir `exercises` subdirectory will be parsed to get the list of exercises
 ```toml
