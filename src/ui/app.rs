@@ -128,7 +128,7 @@ impl App {
         match &mut self.page {
             Page::Workouts(i) => match key.code {
                 KeyCode::Enter => {
-                    if let Some(workout) = self.workouts.iter().nth(*i as usize) {
+                    if let Some(workout) = self.workouts.get(*i as usize) {
                         self.popup = Some(Box::new(WorkoutPopup::new(workout)));
                     }
                 }
