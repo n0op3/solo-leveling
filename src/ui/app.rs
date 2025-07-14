@@ -18,11 +18,11 @@ use crate::config::exercise::load_exercises;
 use crate::config::user::{UserConfig, load_user_config};
 use crate::data;
 use crate::data::user::{UserData, load_user_data};
+use crate::ui::widget::pages::Page;
 use crate::ui::widget::popup::Popup;
 use crate::ui::widget::popup::bonus_xp_popup::BonusXPPopup;
 use crate::ui::widget::popup::exercise_popup::ExercisePopup;
 use crate::ui::widget::popup::popup_area;
-use crate::ui::widget::tabs::Page;
 
 pub struct App {
     exit: bool,
@@ -43,7 +43,7 @@ impl Default for App {
             user_data: load_user_data(),
             exercises: load_exercises(),
             popup: None,
-            page: Page::Dashboard,
+            page: Page::Overview,
         };
 
         let custom_username = app.user_config.name.clone();
@@ -79,7 +79,7 @@ impl App {
             Page::Exercises(_) => {
                 vec![" Select ".into(), "<Enter> ".blue().bold()]
             }
-            Page::Dashboard => {
+            Page::Overview => {
                 vec![" Add Bonus XP ".into(), "<b> ".blue().bold()]
             }
             _ => Vec::new(),
@@ -100,7 +100,7 @@ impl App {
 
         let area = area.inner(Margin::new(4, 0));
         match self.page {
-            Page::Dashboard => {
+            Page::Overview => {
                 let mut constraints = vec![Constraint::Max(1), Constraint::Length(5)];
 
                 for _category in self.user_data.categories.iter() {
@@ -219,7 +219,7 @@ impl App {
                 }
                 _ => {}
             },
-            Page::Dashboard => match key.code {
+            Page::Overview => match key.code {
                 KeyCode::Esc => self.popup = None,
                 KeyCode::Char('b') => {
                     self.popup = Some(Box::new(BonusXPPopup::default()));
@@ -233,9 +233,9 @@ impl App {
             KeyCode::Char('q') => self.exit = true,
             KeyCode::Tab => {
                 self.page = match self.page {
-                    Page::Dashboard => Page::Workouts,
+                    Page::Overview => Page::Workouts,
                     Page::Workouts => Page::Exercises(0),
-                    Page::Exercises(_) => Page::Dashboard,
+                    Page::Exercises(_) => Page::Overview,
                 }
             }
             _ => {}
