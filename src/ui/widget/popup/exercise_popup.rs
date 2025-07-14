@@ -1,9 +1,12 @@
+use std::collections::HashMap;
+
 use crossterm::event::KeyCode;
 use ratatui::{layout::Constraint, prelude::Margin};
 use ratatui::{layout::Direction, widgets::Paragraph};
 use ratatui::{layout::Rect, widgets::Widget};
 use ratatui::{prelude::Layout, style::Stylize};
 
+use crate::config::daily_quest;
 use crate::config::exercise::Exercise;
 use crate::ui::widget::popup::Popup;
 
@@ -94,6 +97,11 @@ impl Popup for ExercisePopup {
             }
             KeyCode::Enter => {
                 if let Ok(amount) = self.input.parse::<i32>() {
+                    if let Some(progress) = &mut app.user_data.daily_quest_progress {
+                        let done = *progress.get(&self.title.to_lowercase()).unwrap_or(&0) + amount;
+                        progress.insert(self.title.to_lowercase(), done);
+                    }
+
                     app.add_xp(
                         self.exercise.category.clone(),
                         self.exercise.xp(amount) as i32,
