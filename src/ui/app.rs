@@ -16,6 +16,7 @@ use crate::category::Category;
 use crate::config::exercise::Exercise;
 use crate::config::exercise::load_exercises;
 use crate::config::user::{UserConfig, load_user_config};
+use crate::config::workout::{Workout, load_workouts};
 use crate::data;
 use crate::data::user::{UserData, load_user_data};
 use crate::ui::widget::pages::Page;
@@ -31,6 +32,7 @@ pub struct App {
     pub user_config: UserConfig,
     pub user_data: UserData,
     pub exercises: HashMap<String, Exercise>,
+    pub workouts: Vec<Workout>,
     popup: Option<Box<dyn Popup>>,
     page: Page,
 }
@@ -43,6 +45,7 @@ impl Default for App {
             user_config: load_user_config(),
             user_data: load_user_data(),
             exercises: load_exercises(),
+            workouts: load_workouts(),
             popup: None,
             page: Page::Overview,
         };

@@ -4,6 +4,7 @@ use std::{fs, path::PathBuf};
 pub mod daily_quest;
 pub mod exercise;
 pub mod user;
+pub mod workout;
 
 pub fn get_config_dir() -> PathBuf {
     let mut config_path = config_dir().expect("No viable config directory found");
