@@ -97,12 +97,12 @@ impl Page {
                         frame.render_widget(
                             Gauge::default()
                                 .block(Block::bordered().title(exercise_name.to_uppercase()))
-                                .gauge_style(Style::new().fg(match percentage {
-                                    0.0..=0.2 => Color::Red,
-                                    0.2..0.5 => Color::Yellow,
-                                    0.5..1.0 => Color::LightYellow,
-                                    _ => Color::Green,
-                                }))
+                                .gauge_style(match percentage {
+                                    0.0..=0.2 => Style::new().red(),
+                                    0.2..0.5 => Style::new().yellow(),
+                                    0.5..1.0 => Style::new().light_yellow(),
+                                    _ => Style::new().green(),
+                                })
                                 .label(format!("{done} / {to_do}"))
                                 .percent((percentage * 100.0) as u16),
                             chunks[i],
