@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
     fs::{self, read_to_string},
     path::PathBuf,
 };
@@ -9,6 +10,7 @@ use crate::config::get_config_dir;
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct UserConfig {
     pub name: Option<String>,
+    pub daily_quest: Option<HashMap<String, i32>>,
 }
 
 pub fn load_user_config() -> UserConfig {
