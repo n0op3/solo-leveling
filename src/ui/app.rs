@@ -182,7 +182,7 @@ impl App {
         }
 
         match key.code {
-            KeyCode::Char('q') => self.exit = true,
+            KeyCode::Char('q') | KeyCode::Esc => self.exit = true,
             KeyCode::Tab => {
                 self.page = match self.page {
                     Page::Overview => Page::DailyQuest,
