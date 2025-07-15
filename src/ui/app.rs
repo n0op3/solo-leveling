@@ -191,6 +191,16 @@ impl App {
                     Page::Exercises(_) => Page::Overview,
                 }
             }
+            KeyCode::Char('1') => self.page = Page::Overview,
+            KeyCode::Char('2') => self.page = Page::DailyQuest,
+            KeyCode::Char('3') => match self.page {
+                Page::Workouts(_) => {}
+                _ => self.page = Page::Workouts(0),
+            },
+            KeyCode::Char('4') => match self.page {
+                Page::Exercises(_) => {}
+                _ => self.page = Page::Exercises(0),
+            },
             _ => {}
         }
     }
