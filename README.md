@@ -2,9 +2,9 @@
 This app was inspired by The System from Solo Leveling. In the story, the quests
 the main character completes grant him experience and allow to upgrade his stats.
 
-Of course, in real life, I have no way of giving you magic skills with this app.
+Of course, in real life, I have no way of giving you magic skills.
 You can still get stronger by consistently working out though, and that's what
-this app is supposed to help you with.
+this is supposed to help you with.
 
 # Configuration
 The configuration directories are as follows:
