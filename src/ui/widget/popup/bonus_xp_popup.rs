@@ -135,9 +135,14 @@ impl Popup for BonusXPPopup {
                         | KeyCode::Char('8')
                         | KeyCode::Char('9') => {
                             if !(key == KeyCode::Char('0') && self.xp_input.is_empty())
-                                && self.xp_input.len() < 3
+                                && self.xp_input.len() < 4
                             {
                                 self.xp_input.push(key.as_char().unwrap());
+                            }
+                        }
+                        KeyCode::Char('-') => {
+                            if !self.input_focused && self.xp_input.is_empty() {
+                                self.xp_input.push('-');
                             }
                         }
                         _ => {}
