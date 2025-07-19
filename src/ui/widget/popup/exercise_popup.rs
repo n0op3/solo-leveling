@@ -5,7 +5,7 @@ use ratatui::{layout::Rect, widgets::Widget};
 use ratatui::{prelude::Layout, style::Stylize};
 
 use crate::config::exercise::Exercise;
-use crate::ui::widget::popup::Popup;
+use crate::ui::widget::popup::{MAX_INPUT_LENGTH, Popup};
 
 pub struct ExercisePopup {
     title: String,
@@ -83,7 +83,9 @@ impl Popup for ExercisePopup {
             | KeyCode::Char('7')
             | KeyCode::Char('8')
             | KeyCode::Char('9') => {
-                if !(key == KeyCode::Char('0') && self.input.is_empty()) && self.input.len() < 3 {
+                if !(key == KeyCode::Char('0') && self.input.is_empty())
+                    && self.input.len() < MAX_INPUT_LENGTH
+                {
                     self.input.push(key.as_char().unwrap());
                 }
             }

@@ -1,4 +1,4 @@
-use crate::ui::widget::popup::Popup;
+use crate::ui::widget::popup::{MAX_INPUT_LENGTH, Popup};
 use crossterm::event::KeyCode;
 use ratatui::style::Color;
 use ratatui::widgets::Widget;
@@ -135,7 +135,7 @@ impl Popup for BonusXPPopup {
                         | KeyCode::Char('8')
                         | KeyCode::Char('9') => {
                             if !(key == KeyCode::Char('0') && self.xp_input.is_empty())
-                                && self.xp_input.len() < 4
+                                && self.xp_input.len() < MAX_INPUT_LENGTH
                             {
                                 self.xp_input.push(key.as_char().unwrap());
                             }

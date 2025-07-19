@@ -12,6 +12,8 @@ use ratatui::{
 
 use crate::ui::app::App;
 
+pub const MAX_INPUT_LENGTH: usize = 4;
+
 pub trait Popup {
     fn render_content(&self, area: Rect, buf: &mut Buffer);
     fn title(&self) -> &String;
