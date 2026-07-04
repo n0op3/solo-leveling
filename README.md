@@ -1,4 +1,6 @@
 # Solo Leveling: The System
+[![Rust](https://github.com/n0op3/solo-leveling-tui/actions/workflows/rust.yml/badge.svg)](https://github.com/n0op3/solo-leveling-tui/actions/workflows/rust.yml)
+
 This app was inspired by The System from Solo Leveling. In the story, the quests
 the main character completes grant him experience and allow to upgrade his stats.
 
